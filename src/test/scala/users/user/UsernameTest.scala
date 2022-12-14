@@ -7,13 +7,13 @@
 package io.github.pervasivecats
 package users.user
 
-import users.user.Username.WrongUsernameFormat
-
 import eu.timepit.refined.api.RefType.refinedRefType.unwrap
+import eu.timepit.refined.auto.given
+import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-import org.scalatest.EitherValues.given
-import eu.timepit.refined.auto.given
+
+import users.user.Username.WrongUsernameFormat
 
 class UsernameTest extends AnyFunSpec {
 
