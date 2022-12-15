@@ -12,38 +12,38 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.user.PlainPassword.WrongPasswordFormat
+import users.user.PlainPassword.WrongPlainPasswordFormat
 
 class PlainPasswordTest extends AnyFunSpec {
 
   describe("A plain password") {
     describe("when created without any lowercase letter") {
       it("should not be valid") {
-        PlainPassword("PASSWORD1!").left.value shouldBe WrongPasswordFormat
+        PlainPassword("PASSWORD1!").left.value shouldBe WrongPlainPasswordFormat
       }
     }
 
     describe("when created without any uppercase letter") {
       it("should not be valid") {
-        PlainPassword("password1!").left.value shouldBe WrongPasswordFormat
+        PlainPassword("password1!").left.value shouldBe WrongPlainPasswordFormat
       }
     }
 
     describe("when created without any number") {
       it("should not be valid") {
-        PlainPassword("Password!").left.value shouldBe WrongPasswordFormat
+        PlainPassword("Password!").left.value shouldBe WrongPlainPasswordFormat
       }
     }
 
     describe("when created without any punctuation character") {
       it("should not be valid") {
-        PlainPassword("Password1").left.value shouldBe WrongPasswordFormat
+        PlainPassword("Password1").left.value shouldBe WrongPlainPasswordFormat
       }
     }
 
     describe("when created with less than 8 characters") {
       it("should not be valid") {
-        PlainPassword("pass12!").left.value shouldBe WrongPasswordFormat
+        PlainPassword("pass12!").left.value shouldBe WrongPlainPasswordFormat
       }
     }
 

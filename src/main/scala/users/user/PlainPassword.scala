@@ -24,13 +24,13 @@ object PlainPassword {
 
   final private case class PlainPasswordImpl(value: PlainPasswordString) extends PlainPassword
 
-  case object WrongPasswordFormat extends ValidationError {
+  case object WrongPlainPasswordFormat extends ValidationError {
 
-    override val message: String = "The password format is invalid"
+    override val message: String = "The plain password format is invalid"
   }
 
   def apply(value: String): Validated[PlainPassword] = applyRef[PlainPasswordString](value) match {
-    case Left(_) => Left[ValidationError, PlainPassword](WrongPasswordFormat)
+    case Left(_) => Left[ValidationError, PlainPassword](WrongPlainPasswordFormat)
     case Right(value) => Right[ValidationError, PlainPassword](PlainPasswordImpl(value))
   }
 }
