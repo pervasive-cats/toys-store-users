@@ -10,5 +10,6 @@ package users
 type Validated[A] = Either[ValidationError, A]
 
 trait ValidationError {
+
   val message: String
 }

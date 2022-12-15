@@ -7,14 +7,14 @@
 package io.github.pervasivecats
 package users.user
 
+import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto.given
-import eu.timepit.refined.refineV
 import eu.timepit.refined.string.MatchesRegex
 
 import users.{Validated, ValidationError}
 
-type UsernameString = String Refined MatchesRegex["^[_0-9A-Za-z][_ 0-9A-Za-z]*$"]
+type UsernameString = String Refined MatchesRegex["^\\w{1,100}$"]
 
 trait Username {
 
@@ -30,10 +30,8 @@ object Username {
     override val message: String = "The username format is invalid"
   }
 
-  def apply(value: String): Validated[Username] = refineV[MatchesRegex["^[_0-9A-Za-z][_ 0-9A-Za-z]*$"]](value) match {
+  def apply(value: String): Validated[Username] = applyRef[UsernameString](value) match {
     case Left(_) => Left[ValidationError, Username](WrongUsernameFormat)
     case Right(value) => Right[ValidationError, Username](UsernameImpl(value))
   }
-
-  given Conversion[Username, String] = _.value
 }
