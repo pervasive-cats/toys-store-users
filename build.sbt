@@ -27,7 +27,8 @@ lazy val root = project
     semanticdbVersion := scalafixSemanticdb.revision,
     libraryDependencies ++= Seq(
       scalactic,
-      scalatest
+      scalatest,
+      refined
     ),
     wartremoverErrors ++= Warts.all,
     version := "0.0.0",
