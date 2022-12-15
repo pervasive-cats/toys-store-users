@@ -5,6 +5,12 @@
  */
 
 package io.github.pervasivecats
+package Administration
 
-@main
-def main(): Unit = println("Hello world!")
+trait Administration {
+
+}
+
+object Administration {
+
+}
