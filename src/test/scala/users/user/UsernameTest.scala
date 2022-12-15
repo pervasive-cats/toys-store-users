@@ -41,9 +41,11 @@ class UsernameTest extends AnyFunSpec {
 
     describe("when created with a string containing printable non-word characters or tabs or newlines") {
       it("should not be valid") {
-        "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~\t\n".split("").toSeq.map(Username(_)).foreach(
-          _.left.value shouldBe WrongUsernameFormat
-        )
+        "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~\t\n"
+          .split("")
+          .toSeq
+          .map(Username(_))
+          .foreach(_.left.value shouldBe WrongUsernameFormat)
       }
     }
 

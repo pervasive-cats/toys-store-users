@@ -21,6 +21,6 @@ trait EncryptedPassword {
 object EncryptedPassword {
 
   final private case class EncryptedPasswordImpl(value: String) extends EncryptedPassword
-  
+
   private[user] def apply(value: String): EncryptedPassword = EncryptedPasswordImpl(value)
 }

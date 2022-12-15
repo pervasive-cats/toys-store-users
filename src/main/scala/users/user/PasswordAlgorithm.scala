@@ -7,8 +7,11 @@
 package io.github.pervasivecats
 package users.user
 
-import at.favre.lib.crypto.bcrypt.{BCrypt, LongPasswordStrategies, LongPasswordStrategy}
+import at.favre.lib.crypto.bcrypt.BCrypt
+import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
+import at.favre.lib.crypto.bcrypt.LongPasswordStrategy
 import eu.timepit.refined.auto.given
+
 import users.Validated
 
 object PasswordAlgorithm {
