@@ -7,10 +7,6 @@
 package io.github.pervasivecats
 package Administration
 
-trait Administration {
+trait Administration {}
 
-}
-
-object Administration {
-
-}
+object Administration {}
