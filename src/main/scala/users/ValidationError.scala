@@ -5,6 +5,11 @@
  */
 
 package io.github.pervasivecats
+package users
 
-@main
-def main(): Unit = println("Hello world!")
+type Validated[A] = Either[ValidationError, A]
+
+trait ValidationError {
+
+  val message: String
+}
