@@ -28,7 +28,8 @@ lazy val root = project
     libraryDependencies ++= Seq(
       scalactic,
       scalatest,
-      refined
+      refined,
+      bcrypt
     ),
     wartremoverErrors ++= Warts.all,
     version := "0.0.0",
