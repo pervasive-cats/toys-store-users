@@ -7,6 +7,10 @@
 package io.github.pervasivecats
 package users.user
 
+import io.github.pervasivecats.users.user.entities.User
+import io.github.pervasivecats.users.user.valueobjects.EncryptedPassword
+import io.github.pervasivecats.users.user.valueobjects.PlainPassword
+
 import users.{Validated, ValidationError}
 
 trait Repository[A <: User] {

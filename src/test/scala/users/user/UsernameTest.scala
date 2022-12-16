@@ -9,12 +9,13 @@ package users.user
 
 import java.util.Locale
 
+import io.github.pervasivecats.users.user.valueobjects.Username
+import io.github.pervasivecats.users.user.valueobjects.Username.WrongUsernameFormat
+
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-
-import users.user.Username.WrongUsernameFormat
 
 class UsernameTest extends AnyFunSpec {
 

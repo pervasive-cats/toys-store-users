@@ -7,6 +7,10 @@
 package io.github.pervasivecats
 package users.user
 
+import io.github.pervasivecats.users.user.entities.User
+import io.github.pervasivecats.users.user.valueobjects.EncryptedPassword
+import io.github.pervasivecats.users.user.valueobjects.PlainPassword
+
 import org.mockito.Mockito.*
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
@@ -24,7 +28,7 @@ class UserTest extends AnyFunSpec {
     Right[ValidationError, EncryptedPassword](EncryptedPassword("$2a$12$S47E5x.8.khg8lmKzfWk3e6Ik9HzR5xalCIDVMGJBn5A0QeZyRo.u"))
   )
 
-  import UserOps.verifyPassword
+  import io.github.pervasivecats.users.user.entities.UserOps.verifyPassword
 
   describe("A user") {
     describe("when given the correct password to verify") {

@@ -5,14 +5,13 @@
  */
 
 package io.github.pervasivecats
-package users.user
+package users.user.services
 
-import at.favre.lib.crypto.bcrypt.BCrypt
-import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
-import at.favre.lib.crypto.bcrypt.LongPasswordStrategy
+import at.favre.lib.crypto.bcrypt.*
 import eu.timepit.refined.auto.given
 
 import users.Validated
+import users.user.valueobjects.{EncryptedPassword, PlainPassword}
 
 trait PasswordAlgorithm {
 

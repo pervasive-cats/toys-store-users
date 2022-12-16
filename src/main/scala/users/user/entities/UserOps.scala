@@ -5,9 +5,13 @@
  */
 
 package io.github.pervasivecats
-package users.user
+package users.user.entities
+
+import io.github.pervasivecats.users.user.services.PasswordAlgorithm
 
 import users.Validated
+import users.user.*
+import users.user.valueobjects.PlainPassword
 
 trait UserOps[A <: User] {
 

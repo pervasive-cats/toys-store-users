@@ -12,7 +12,8 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.user.PlainPassword.WrongPlainPasswordFormat
+import users.user.valueobjects.PlainPassword
+import users.user.valueobjects.PlainPassword.WrongPlainPasswordFormat
 
 class PlainPasswordTest extends AnyFunSpec {
 
