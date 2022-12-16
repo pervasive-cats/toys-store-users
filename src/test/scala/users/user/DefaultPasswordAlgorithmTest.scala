@@ -10,7 +10,7 @@ package users.user
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-class PasswordAlgorithmTest extends AnyFunSpec {
+class DefaultPasswordAlgorithmTest extends AnyFunSpec {
 
   private val defaultPasswordAlgorithm: PasswordAlgorithm = summon[PasswordAlgorithm]
   private val password: PlainPassword = PlainPassword("Password1!").getOrElse(fail())

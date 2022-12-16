@@ -11,13 +11,14 @@ import users.Validated
 
 trait UserOps[A <: User] {
 
-  def verifyPassword(user: A, password: PlainPassword): Validated[Boolean]
+  def verifyPassword(user: A, password: PlainPassword)(using PasswordAlgorithm, Repository[A]): Validated[Boolean]
 }
 
 object UserOps {
 
   extension [A <: User: UserOps](user: A) {
 
-    def verifyPassword(password: PlainPassword): Validated[Boolean] = implicitly[UserOps[A]].verifyPassword(user, password)
+    def verifyPassword(password: PlainPassword)(using PasswordAlgorithm, Repository[A]): Validated[Boolean] =
+      implicitly[UserOps[A]].verifyPassword(user, password)
   }
 }

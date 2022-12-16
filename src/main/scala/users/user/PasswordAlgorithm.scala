@@ -14,17 +14,27 @@ import eu.timepit.refined.auto.given
 
 import users.Validated
 
+trait PasswordAlgorithm {
+
+  def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean
+
+  def encrypt(plainPassword: PlainPassword): EncryptedPassword
+}
+
 object PasswordAlgorithm {
 
-  private val cost: Int = 12
-  private val version: BCrypt.Version = BCrypt.Version.VERSION_2A
-  private val longPasswordStrategy: LongPasswordStrategy = LongPasswordStrategies.hashSha512(version)
-  private val hashAlgorithm: BCrypt.Hasher = BCrypt.`with`(longPasswordStrategy)
-  private val verifyAlgorithm: BCrypt.Verifyer = BCrypt.verifyer(version, longPasswordStrategy)
+  given PasswordAlgorithm with {
 
-  def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean =
-    verifyAlgorithm.verify(actualPassword.value.toCharArray, expectedPassword.value).verified
+    private val cost: Int = 12
+    private val version: BCrypt.Version = BCrypt.Version.VERSION_2A
+    private val longPasswordStrategy: LongPasswordStrategy = LongPasswordStrategies.hashSha512(version)
+    private val hashAlgorithm: BCrypt.Hasher = BCrypt.`with`(longPasswordStrategy)
+    private val verifyAlgorithm: BCrypt.Verifyer = BCrypt.verifyer(version, longPasswordStrategy)
 
-  def encrypt(plainPassword: PlainPassword): EncryptedPassword =
-    EncryptedPassword(hashAlgorithm.hashToString(cost, plainPassword.value.toCharArray))
+    def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean =
+      verifyAlgorithm.verify(actualPassword.value.toCharArray, expectedPassword.value).verified
+
+    def encrypt(plainPassword: PlainPassword): EncryptedPassword =
+      EncryptedPassword(hashAlgorithm.hashToString(cost, plainPassword.value.toCharArray))
+  }
 }

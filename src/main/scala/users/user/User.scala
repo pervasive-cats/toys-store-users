@@ -7,7 +7,7 @@
 package io.github.pervasivecats
 package users.user
 
-import users.ValidationError
+import users.{Validated, ValidationError}
 
 trait User {
 
@@ -16,12 +16,18 @@ trait User {
 
 object User {
 
-  final private case class UserImpl(username: Username) extends User
+  given [A <: User]: UserOps[A] with {
 
-  given UserOps[User] = (user, password) =>
-    Right[ValidationError, EncryptedPassword](
-      EncryptedPassword("$2a$12$S47E5x.8.khg8lmKzfWk3e6Ik9HzR5xalCIDVMGJBn5A0QeZyRo.u")
-    ).map(PasswordAlgorithm.check(_, password))
-
-  def apply(username: Username): User = UserImpl(username)
+    override def verifyPassword(
+      user: A,
+      password: PlainPassword
+    )(
+      using
+      PasswordAlgorithm,
+      Repository[A]
+    ): Validated[Boolean] = for {
+      p <- summon[Repository[A]].findPassword(user)
+      r = summon[PasswordAlgorithm].check(p, password)
+    } yield r
+  }
 }
