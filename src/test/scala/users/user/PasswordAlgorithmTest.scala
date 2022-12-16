@@ -14,7 +14,7 @@ class PasswordAlgorithmTest extends AnyFunSpec {
 
   describe("A password algorithm") {
     describe("when used to encode a password") {
-      it("should provide the correct encoded password") {
+      it("should provide a password encoded in the correct format") {
         PlainPassword("Password1!") match {
           case Right(v) => PasswordAlgorithm.encrypt(v).value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
           case _ => fail()
