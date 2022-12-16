@@ -28,10 +28,13 @@ lazy val root = project
     libraryDependencies ++= Seq(
       scalactic,
       scalatest,
+      mockito,
       refined,
-      bcrypt
+      bcrypt,
+      quill,
+      postgresql
     ),
-    wartremoverErrors ++= Warts.all,
+    wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
     version := "0.0.0",
     coverageEnabled := true,
     coverageMinimumStmtTotal := 80,
