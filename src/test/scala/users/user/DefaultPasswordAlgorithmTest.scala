@@ -18,7 +18,7 @@ class DefaultPasswordAlgorithmTest extends AnyFunSpec {
   describe("A password algorithm") {
     describe("when used to encode a password") {
       it("should provide a password encoded in the correct format") {
-         defaultPasswordAlgorithm.encrypt(password).value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
+        defaultPasswordAlgorithm.encrypt(password).value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
       }
     }
 

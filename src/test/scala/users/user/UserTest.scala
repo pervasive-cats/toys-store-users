@@ -7,12 +7,12 @@
 package io.github.pervasivecats
 package users.user
 
-import users.{user, ValidationError}
-
+import org.mockito.Mockito.*
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-import org.mockito.Mockito.*
+
+import users.{user, ValidationError}
 
 class UserTest extends AnyFunSpec {
 
