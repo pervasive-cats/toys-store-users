@@ -12,31 +12,27 @@ import org.scalatest.matchers.should.Matchers.*
 
 class PasswordAlgorithmTest extends AnyFunSpec {
 
+  private val defaultPasswordAlgorithm: PasswordAlgorithm = summon[PasswordAlgorithm]
+  private val password: PlainPassword = PlainPassword("Password1!").getOrElse(fail())
+
   describe("A password algorithm") {
     describe("when used to encode a password") {
       it("should provide a password encoded in the correct format") {
-        PlainPassword("Password1!") match {
-          case Right(v) => PasswordAlgorithm.encrypt(v).value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
-          case _ => fail()
-        }
+         defaultPasswordAlgorithm.encrypt(password).value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
       }
     }
 
     describe("when used for checking a password against the correct one") {
       it("should return true") {
-        PlainPassword("Password1!") match {
-          case Right(v) => PasswordAlgorithm.check(PasswordAlgorithm.encrypt(v), v) shouldBe true
-          case _ => fail()
-        }
+        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password), password) shouldBe true
       }
     }
 
     describe("when used for checking a password against the wrong one") {
       it("should return false") {
-        (PlainPassword("Password1!"), PlainPassword("Password2!")) match {
-          case (Right(v1), Right(v2)) => PasswordAlgorithm.check(PasswordAlgorithm.encrypt(v1), v2) shouldBe false
-          case _ => fail()
-        }
+        val wrongPassword: PlainPassword = PlainPassword("Password2!").getOrElse(fail())
+
+        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password), wrongPassword) shouldBe false
       }
     }
   }
