@@ -5,9 +5,12 @@
  */
 
 package io.github.pervasivecats
-package Administration
 
-trait Administration {}
+package users
 
-object Administration {}
+type Validated[A] = Either[ValidationError, A]
 
+trait ValidationError {
+
+  val message: String
+}

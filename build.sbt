@@ -27,9 +27,14 @@ lazy val root = project
     semanticdbVersion := scalafixSemanticdb.revision,
     libraryDependencies ++= Seq(
       scalactic,
-      scalatest
+      scalatest,
+      mockito,
+      refined,
+      bcrypt,
+      quill,
+      postgresql
     ),
-    wartremoverErrors ++= Warts.all,
+    wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
     version := "0.0.0",
     coverageEnabled := true,
     coverageMinimumStmtTotal := 80,
