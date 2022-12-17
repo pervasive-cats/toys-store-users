@@ -35,7 +35,7 @@ lazy val root = project
       postgresql
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
-    version := "0.0.0",
+    version := "1.0.0-beta.1",
     coverageEnabled := true,
     coverageMinimumStmtTotal := 80,
     coverageMinimumBranchTotal := 80,
