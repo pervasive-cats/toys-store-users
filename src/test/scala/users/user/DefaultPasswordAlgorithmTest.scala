@@ -7,11 +7,11 @@
 package io.github.pervasivecats
 package users.user
 
-import io.github.pervasivecats.users.user.services.PasswordAlgorithm
-import io.github.pervasivecats.users.user.valueobjects.PlainPassword
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
+
+import users.user.services.PasswordAlgorithm
+import users.user.valueobjects.PlainPassword
 
 class DefaultPasswordAlgorithmTest extends AnyFunSpec {
 

@@ -44,7 +44,7 @@ class PlainPasswordTest extends AnyFunSpec {
 
     describe("when created with less than 8 characters") {
       it("should not be valid") {
-        PlainPassword("pass12!").left.value shouldBe WrongPlainPasswordFormat
+        PlainPassword("Pass12!").left.value shouldBe WrongPlainPasswordFormat
       }
     }
 

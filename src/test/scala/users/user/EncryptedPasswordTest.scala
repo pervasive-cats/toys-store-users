@@ -7,10 +7,10 @@
 package io.github.pervasivecats
 package users.user
 
-import io.github.pervasivecats.users.user.valueobjects.EncryptedPassword
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
+
+import users.user.valueobjects.EncryptedPassword
 
 class EncryptedPasswordTest extends AnyFunSpec {
 

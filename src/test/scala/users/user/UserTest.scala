@@ -7,33 +7,33 @@
 package io.github.pervasivecats
 package users.user
 
-import io.github.pervasivecats.users.user.entities.User
-import io.github.pervasivecats.users.user.valueobjects.EncryptedPassword
-import io.github.pervasivecats.users.user.valueobjects.PlainPassword
-
 import org.mockito.Mockito.*
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.{user, ValidationError}
+import users.ValidationError
+import users.user.entities.User
+import users.user.services.PasswordAlgorithm
+import users.user.valueobjects.{EncryptedPassword, PlainPassword}
 
 class UserTest extends AnyFunSpec {
 
   private val mockUser: User = mock(classOf[User])
+  private val password: PlainPassword = PlainPassword("Password1!").getOrElse(fail())
 
   private given mockRepository: Repository[User] = mock(classOf[Repository[User]])
 
   when(mockRepository.findPassword(mockUser)).thenReturn(
-    Right[ValidationError, EncryptedPassword](EncryptedPassword("$2a$12$S47E5x.8.khg8lmKzfWk3e6Ik9HzR5xalCIDVMGJBn5A0QeZyRo.u"))
+    Right[ValidationError, EncryptedPassword](summon[PasswordAlgorithm].encrypt(password))
   )
 
-  import io.github.pervasivecats.users.user.entities.UserOps.verifyPassword
+  import users.user.entities.UserOps.verifyPassword
 
   describe("A user") {
     describe("when given the correct password to verify") {
       it("should return true") {
-        mockUser.verifyPassword(PlainPassword("Password1!").getOrElse(fail())).value shouldBe true
+        mockUser.verifyPassword(password).value shouldBe true
       }
     }
 
