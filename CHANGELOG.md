@@ -1,3 +1,10 @@
+# [1.0.0-beta.2](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2022-12-18)
+
+
+### Features
+
+* add schemas for administration, store managers, customers ([d22953a](https://github.com/pervasive-cats/toys-store-users/commit/d22953ad683bc75e7d61dc9a00e42a2db5010742))
+
 # 1.0.0-beta.1 (2022-12-17)
 
 
