@@ -8,11 +8,11 @@ package io.github.pervasivecats
 package users.storemanager
 
 import eu.timepit.refined.auto.given
+import users.storemanager.valueobjects.Store
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-
-import users.storemanager.Store.WrongStoreFormat
+import users.storemanager.valueobjects.Store.WrongStoreFormat
 
 class StoreTest extends AnyFunSpec {
 
