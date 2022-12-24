@@ -8,18 +8,18 @@ package io.github.pervasivecats
 package users.storemanager.entities
 
 import users.storemanager.valueobjects.Store
-import StoreManager.given
+import users.user.entities.UserOps
 
-trait StoreManagerOps {
+trait StoreManagerOps[A <: StoreManager : UserOps] {
 
-  def updateStore(storeManager: StoreManager, newStore: Store): StoreManager
+  def updateStore(storeManager: A, newStore: Store): A
 }
 
 object StoreManagerOps {
 
-  extension (storeManager: StoreManager) {
+  extension [A <: StoreManager : StoreManagerOps](storeManager: A) {
 
-    def updateStore(newStore: Store): StoreManager = implicitly[StoreManagerOps].updateStore(storeManager, newStore)
+    def updateStore(newStore: Store): A = implicitly[StoreManagerOps[A]].updateStore(storeManager, newStore)
   }
 
 }

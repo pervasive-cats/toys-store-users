@@ -19,7 +19,7 @@ trait UserOps[A <: User] {
 
 object UserOps {
 
-  extension [A <: User: UserOps](user: A) {
+  extension [A <: User : UserOps](user: A) {
 
     def verifyPassword(password: PlainPassword)(using PasswordAlgorithm, Repository[A]): Validated[Boolean] =
       implicitly[UserOps[A]].verifyPassword(user, password)
