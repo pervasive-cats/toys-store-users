@@ -32,5 +32,21 @@ class StoreManagerTest extends AnyFunSpec {
         (manager.store.value: Long) shouldBe storeID
       }
     }
+
+    import users.storemanager.entities.StoreManagerOps.updateStore
+
+    describe("when updated with a valid new store") {
+      it("should correctly update") {
+        val username: Username = Username(usernameString).value
+        val store: Store = Store(storeID).value
+        val newStoreID: Long = 2
+        val newStore: Store = Store(newStoreID).value
+        val manager: StoreManager = StoreManager(username, store)
+
+        val updatedManager: StoreManager = manager.updateStore(newStore)
+        (updatedManager.store.value: Long) shouldBe newStoreID
+        (updatedManager.username.value: String) shouldBe usernameString
+      }
+    }
   }
 }

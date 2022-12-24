@@ -20,5 +20,11 @@ object StoreManager {
 
   final private case class StoreManagerImpl(username: Username, store: Store) extends StoreManager
 
+  given StoreManagerOps with {
+
+    override def updateStore(storeManager: StoreManager, newStore: Store): StoreManager =
+      StoreManager(storeManager.username, newStore)
+  }
+
   def apply(username: Username, store: Store): StoreManager = StoreManagerImpl(username, store)
 }
