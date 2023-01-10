@@ -10,6 +10,7 @@ package users.storemanager
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.auto.autoUnwrap
 import eu.timepit.refined.auto.given
