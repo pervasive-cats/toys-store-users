@@ -25,7 +25,7 @@ import users.user.Repository
 
 trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
-//  def findByUsername(username: Username): Validated[A]
+  def findByUsername(username: Username): Validated[A]
 
   def register(storeManager: A, password: EncryptedPassword): Validated[Unit]
 
@@ -44,6 +44,11 @@ object StoreManagerRepository {
     override val message: String = "The Postgresql operation failed"
   }
 
+  case object UserNotFound extends ValidationError {
+
+    override val message: String = "No user found for the username that was provided"
+  }
+
   case object UniqueViolation extends ValidationError {
 
     override val message: String = "Username already in use"
@@ -59,11 +64,29 @@ object StoreManagerRepository {
 
     import ctx.*
 
-//    override def findByUsername(username: Username): Validated[StoreManager] = ???
+    override def findByUsername(username: Username): Validated[StoreManager] = {
+
+      val r: Try[List[StoreManagers]] = Try(ctx.run(query[StoreManagers].filter(m => m.username.like(lift(username.value)))))
+
+      r match {
+        case Failure(_: PSQLException) => Left[ValidationError, StoreManager](PSQLError)
+        case Failure(_) => Left[ValidationError, StoreManager](UnexpectedException)
+        case Success(v) =>
+          v.headOption match {
+            case None => Left[ValidationError, StoreManager](UserNotFound)
+            case Some(sm) =>
+              for {
+                username <- Username(sm.username)
+                store <- Store(sm.store)
+              } yield StoreManager(username, store)
+          }
+      }
+    }
 
 //    override def findPassword(user: StoreManager): Validated[EncryptedPassword] = ???
 
     override def register(storeManager: StoreManager, password: EncryptedPassword): Validated[Unit] = {
+
       val r = Try(
         ctx.run(
           query[StoreManagers]
@@ -73,8 +96,8 @@ object StoreManagerRepository {
 
       r match {
         case Failure(e: PSQLException) if e.getSQLState.contentEquals("23505") => Left[ValidationError, Unit](UniqueViolation)
-        case Failure(e: PSQLException) => Left[ValidationError, Unit](PSQLError)
-        case Failure(e) => Left[ValidationError, Unit](UnexpectedException)
+        case Failure(_: PSQLException) => Left[ValidationError, Unit](PSQLError)
+        case Failure(_) => Left[ValidationError, Unit](UnexpectedException)
         case Success(_) => Right[ValidationError, Unit](println("Store manager inserted"))
       }
     }
@@ -84,6 +107,17 @@ object StoreManagerRepository {
 //    override def updatePassword(user: StoreManager, password: PlainPassword): Validated[Unit] = ???
 
 //    override def unregister(storeManager: StoreManager): Validated[Unit] = ???
+  }
+}
+
+@main
+def testFindByUsername(): Unit = {
+
+  for {
+    username <- Username("mario")
+  } do {
+    val r = summon[StoreManagerRepository[StoreManager]].findByUsername(username)
+    println(r)
   }
 }
 
