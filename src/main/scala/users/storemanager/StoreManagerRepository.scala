@@ -10,7 +10,6 @@ package users.storemanager
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.auto.autoUnwrap
 import eu.timepit.refined.auto.given
@@ -22,6 +21,7 @@ import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.storemanager.valueobjects.Store
 import users.user.Repository
+import users.storemanager.StoreManagerRepositoryError.*
 
 trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
@@ -38,26 +38,6 @@ trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 object StoreManagerRepository {
 
   case class StoreManagers(username: String, password: String, store: Long)
-
-  case object PSQLError extends ValidationError {
-
-    override val message: String = "The Postgresql operation failed"
-  }
-
-  case object UserNotFound extends ValidationError {
-
-    override val message: String = "No user found for the username that was provided"
-  }
-
-  case object UniqueViolation extends ValidationError {
-
-    override val message: String = "Username already in use"
-  }
-
-  case object UnexpectedException extends ValidationError {
-
-    override val message: String = "An unexpected exception has occurred"
-  }
 
   given StoreManagerRepository[StoreManager] with {
     private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, "ctx")
