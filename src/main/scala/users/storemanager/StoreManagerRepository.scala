@@ -23,6 +23,7 @@ import users.{Validated, ValidationError}
 import users.storemanager.valueobjects.Store
 import users.user.Repository
 import users.storemanager.StoreManagerRepositoryError.*
+import AnyOps.*
 
 trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
@@ -47,7 +48,9 @@ object StoreManagerRepository {
 
     override def findByUsername(username: Username): Validated[StoreManager] = {
 
-      val r: Try[List[StoreManagers]] = Try(ctx.run(query[StoreManagers].filter(m => m.username.like(lift(username.value)))))
+      val r: Try[List[StoreManagers]] = Try(
+        ctx.run(query[StoreManagers].filter(m => m.username.like(lift(username.value))))
+      )
 
       r match {
         case Failure(_: PSQLException) => Left[ValidationError, StoreManager](PSQLError)
@@ -76,7 +79,7 @@ object StoreManagerRepository {
       )
 
       r match {
-        case Failure(e: PSQLException) if e.getSQLState.contentEquals("23505") => Left[ValidationError, Unit](UniqueViolation)
+        case Failure(e: PSQLException) if e.getSQLState === "23505" => Left[ValidationError, Unit](UniqueViolation)
         case Failure(_: PSQLException) => Left[ValidationError, Unit](PSQLError)
         case Failure(_) => Left[ValidationError, Unit](UnexpectedException)
         case Success(_) => Right[ValidationError, Unit](println("Store manager inserted"))
