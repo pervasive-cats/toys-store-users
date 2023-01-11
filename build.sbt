@@ -4,6 +4,8 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / excludeLintKeys := Set(idePackagePrefix)
 
+Test / fork := true
+
 ThisBuild / scalaVersion := "3.2.2-RC2"
 
 ThisBuild / scalafixDependencies ++= Seq(
@@ -32,7 +34,9 @@ lazy val root = project
       refined,
       bcrypt,
       quill,
-      postgresql
+      postgresql,
+      testContainers,
+      testContainersPostgresql
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
     version := "1.0.0-beta.2",
