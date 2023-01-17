@@ -25,7 +25,7 @@ class UserTest extends AnyFunSpec {
   private given mockRepository: Repository[User] = mock(classOf[Repository[User]])
 
   when(mockRepository.findPassword(mockUser)).thenReturn(
-    Right[ValidationError, EncryptedPassword](summon[PasswordAlgorithm].encrypt(password))
+    Right[ValidationError, EncryptedPassword](summon[PasswordAlgorithm].encrypt(password).getOrElse(fail()))
   )
 
   import users.user.entities.UserOps.verifyPassword
