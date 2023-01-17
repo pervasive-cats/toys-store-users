@@ -11,6 +11,8 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.auto.autoUnwrap
 import eu.timepit.refined.auto.given
@@ -39,15 +41,24 @@ trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
 object StoreManagerRepository {
 
-  case class StoreManagers(username: String, password: String, store: Long)
+  final private class StoreManagerRepositoryImpl(port: Int) extends StoreManagerRepository[StoreManager] {
 
-  given StoreManagerRepository[StoreManager] with {
-    private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, "ctx")
+    final private case class StoreManagers(username: String, password: String, store: Long)
+
+    private val config = new HikariConfig()
+    config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource")
+    config.addDataSourceProperty("user", "test")
+    config.addDataSourceProperty("password", "test")
+    config.addDataSourceProperty("databaseName", "users")
+    config.addDataSourceProperty("portNumber", port)
+
+    private val ds = new HikariDataSource(config)
+
+    private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, ds)
 
     import ctx.*
 
     override def findByUsername(username: Username): Validated[StoreManager] = {
-
       val r: Try[List[StoreManagers]] = Try(
         ctx.run(query[StoreManagers].filter(m => m.username.like(lift(username.value))))
       )
@@ -67,8 +78,6 @@ object StoreManagerRepository {
       }
     }
 
-//    override def findPassword(user: StoreManager): Validated[EncryptedPassword] = ???
-
     override def register(storeManager: StoreManager, password: EncryptedPassword): Validated[Unit] = {
 
       val r = Try(
@@ -85,35 +94,23 @@ object StoreManagerRepository {
         case Success(_) => Right[ValidationError, Unit](println("Store manager inserted"))
       }
     }
-
-//    override def updateStore(storeManager: StoreManager, store: Store): Validated[Unit] = ???
-
-//    override def updatePassword(user: StoreManager, password: PlainPassword): Validated[Unit] = ???
-
-//    override def unregister(storeManager: StoreManager): Validated[Unit] = ???
-  }
-}
-
-@main
-def testFindByUsername(): Unit = {
-
-  for {
-    username <- Username("mario")
-  } do {
-    val r = summon[StoreManagerRepository[StoreManager]].findByUsername(username)
-    println(r)
-  }
-}
-
-@main
-def testRegister(): Unit = {
-
-  for {
-    username <- Username("mario")
-    store <- Store(1)
-  } do {
-    val r = summon[StoreManagerRepository[StoreManager]].register(StoreManager(username, store), EncryptedPassword("p1"))
-    println(r)
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
+  private var instance: Option[StoreManagerRepositoryImpl] = None
+
+  def getInstance(): Option[StoreManagerRepository[StoreManager]] = instance
+
+  def apply(port: Int): StoreManagerRepository[StoreManager] = instance match {
+    case Some(v) if v !=== port => {
+      System.err.println("StoreManagerRepository already initialized with different port")
+      v
+    }
+    case Some(v) => v
+    case None => {
+      val s = StoreManagerRepositoryImpl(port)
+      instance = Some(s)
+      s
+    }
+  }
 }

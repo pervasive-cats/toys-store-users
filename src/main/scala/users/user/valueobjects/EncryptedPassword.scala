@@ -22,5 +22,5 @@ object EncryptedPassword {
 
   final private case class EncryptedPasswordImpl(value: String) extends EncryptedPassword
 
-  def apply(value: String): EncryptedPassword = EncryptedPasswordImpl(value) // was private[user], removed for testing
+  private[user] def apply(value: String): EncryptedPassword = EncryptedPasswordImpl(value)
 }
