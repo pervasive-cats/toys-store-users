@@ -91,7 +91,7 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
 
     describe("when asked to register a store manager that already exists") {
-      it("should return a RepositoryError") {
+      it("should return RepositoryError") {
         withContainers { _ =>
           for {
             username <- Username(usernameString)
@@ -133,6 +133,56 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
             val result = StoreManagerRepository.getInstance().getOrElse(fail()).findByUsername(username)
             result shouldBe Left[ValidationError, StoreManager](UserNotFound)
           }
+        }
+      }
+    }
+
+    describe("when asked to update a store manager's store") {
+      it("should correctly update the store") {
+        withContainers { _ =>
+          val newStoreID: Long = 99
+          for {
+            username <- Username(usernameString)
+            store <- Store(storeID)
+            newStore <- Store(newStoreID)
+          } do {
+            val result = StoreManagerRepository
+              .getInstance()
+              .getOrElse(fail())
+              .updateStore(StoreManager(username, store), newStore)
+
+            result shouldBe Right[ValidationError, Unit](println("store manager updated"))
+
+            (StoreManagerRepository
+              .getInstance()
+              .getOrElse(fail())
+              .findByUsername(username)
+              .getOrElse(fail())
+              .store
+              .value
+              .value: Long) shouldBe newStoreID
+          }
+        }
+      }
+    }
+  }
+
+
+  describe("when asked to update a non-existent store manager's store") {
+    it("should return UserNotFound") {
+      withContainers { _ =>
+        val newStoreID: Long = 99
+        for {
+          username <- Username("nonmatteo")
+          store <- Store(storeID)
+          newStore <- Store(newStoreID)
+        } do {
+          val result = StoreManagerRepository
+            .getInstance()
+            .getOrElse(fail())
+            .updateStore(StoreManager(username, store), newStore)
+
+          result shouldBe Left[ValidationError, Unit](UserNotFound)
         }
       }
     }

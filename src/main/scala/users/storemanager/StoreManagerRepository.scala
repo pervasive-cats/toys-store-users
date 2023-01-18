@@ -34,7 +34,7 @@ trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
   def register(storeManager: A, password: EncryptedPassword): Validated[Unit]
 
-//  def updateStore(storeManager: A, store: Store): Validated[Unit]
+  def updateStore(storeManager: A, store: Store): Validated[Unit]
 
 //  def unregister(storeManager: A): Validated[Unit]
 
@@ -92,6 +92,24 @@ object StoreManagerRepository {
         case Success(_) => Right[ValidationError, Unit](println("Store manager inserted"))
       }
     }
+
+    override def updateStore(storeManager: StoreManager, store: Store): Validated[Unit] = {
+
+      val r = Try(
+        ctx.run(
+          query[StoreManagers]
+            .filter(m => m.username.like(lift(storeManager.username.value.value)))
+            .update(_.store -> lift(store.value.value))
+        )
+      )
+
+      r match {
+        case Failure(_) => Left[ValidationError, Unit](RepositoryError)
+        case Success(0) => Left[ValidationError, Unit](UserNotFound)
+        case Success(_) => Right[ValidationError, Unit](println("Store manager updated"))
+      }
+    }
+
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
