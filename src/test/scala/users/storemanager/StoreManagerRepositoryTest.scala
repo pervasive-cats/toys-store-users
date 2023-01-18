@@ -7,23 +7,27 @@
 package io.github.pervasivecats
 package users.storemanager
 
-import eu.timepit.refined.auto.given
-import com.dimafeng.testcontainers.PostgreSQLContainer
+import java.sql.DriverManager
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.SECONDS
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
+import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
-import org.testcontainers.utility.DockerImageName
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import eu.timepit.refined.auto.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import org.testcontainers.utility.DockerImageName
 
-import java.sql.DriverManager
-import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.storemanager.valueobjects.Store
 import users.storemanager.entities.StoreManager
 import users.ValidationError
-
-import io.github.pervasivecats.users.user.services.PasswordAlgorithm
+import users.storemanager.StoreManagerRepositoryError.{RepositoryError, UserNotFound}
+import users.user.services.PasswordAlgorithm
 
 class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
@@ -86,6 +90,26 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
       }
     }
 
+    describe("when asked to register a store manager that already exists") {
+      it("should return a RepositoryError") {
+        withContainers { _ =>
+          for {
+            username <- Username(usernameString)
+            store <- Store(storeID)
+          } do {
+            val result = StoreManagerRepository
+              .getInstance()
+              .getOrElse(fail())
+              .register(
+                StoreManager(username, store),
+                summon[PasswordAlgorithm].encrypt(PlainPassword(plainPassword).getOrElse(fail()))
+              )
+            result shouldBe Left[ValidationError, Unit](RepositoryError)
+          }
+        }
+      }
+    }
+
     describe("when asked to retrieve the store manager corresponding to a username") {
       it("should return the requested store manager") {
         withContainers { _ =>
@@ -95,6 +119,19 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
             val result = StoreManagerRepository.getInstance().getOrElse(fail()).findByUsername(username)
             (result.getOrElse(fail()).username.value.value: String) shouldBe usernameString
             (result.getOrElse(fail()).store.value.value: Long) shouldBe storeID
+          }
+        }
+      }
+    }
+
+    describe("when asked to retrieve a non-existent store manager") {
+      it("should return UserNotFound") {
+        withContainers { _ =>
+          for {
+            username <- Username("nonmatteo")
+          } do {
+            val result = StoreManagerRepository.getInstance().getOrElse(fail()).findByUsername(username)
+            result shouldBe Left[ValidationError, StoreManager](UserNotFound)
           }
         }
       }
