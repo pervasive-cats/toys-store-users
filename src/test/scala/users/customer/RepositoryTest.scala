@@ -49,7 +49,9 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
   private val email: Email = Email("mario@email.com").getOrElse(fail())
   private val firstName: NameComponent = NameComponent("Mario").getOrElse(fail())
   private val lastName: NameComponent = NameComponent("Rossi").getOrElse(fail())
-  private val password: EncryptedPassword = summon[PasswordAlgorithm].encrypt(PlainPassword("Password1!").getOrElse(fail()))
+
+  private val password: EncryptedPassword =
+    summon[PasswordAlgorithm].encrypt(PlainPassword("Password1!").getOrElse(fail())).getOrElse(fail())
   private val customer: Customer = Customer(firstName, lastName, email, username)
 
   describe("A customer") {
@@ -98,10 +100,10 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     describe("after being registered and their password updated") {
       it("should show the update") {
         val db: Repository = repository.getOrElse(fail())
+        val newPassword: PlainPassword = PlainPassword("passWORD2?").getOrElse(fail())
         db.register(customer, password).getOrElse(fail())
-        val oldPassword = db.findPassword(customer).getOrElse(fail())
-        db.updatePassword(customer, PlainPassword("passWORD2?").getOrElse(fail())).getOrElse(fail())
-        db.findPassword(customer).value should not be oldPassword
+        db.updatePassword(customer, newPassword).getOrElse(fail())
+        summon[PasswordAlgorithm].check(db.findPassword(customer).value, newPassword) shouldBe true
         db.unregister(customer).getOrElse(fail())
       }
     }
@@ -121,5 +123,4 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       }
     }
   }
-
 }
