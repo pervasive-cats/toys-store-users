@@ -137,32 +137,25 @@ object Repository {
             .filter(_.email === lift[String](customer.email.value))
             .updateValue(lift(CustomersWithoutPassword(email.value, username.value, firstName.value, lastName.value)))
         )
-        !== 1L
+        !==
+        1L
       )
         Left[ValidationError, Unit](OperationFailed)
       else
         Right[ValidationError, Unit](())
     }
 
-    override def updatePassword(user: Customer, password: PlainPassword): Validated[Unit] = {
-      summon[PasswordAlgorithm].encrypt(password) match {
-        case Left(e) => Left[ValidationError, Unit](e)
-        case Right(p) =>
-          protectFromException {
-            if (
-              ctx.run(
-                query[Customers]
-                  .filter(_.email === lift[String](user.email.value))
-                  .update(_.password -> lift[String](p.value))
-              )
-              !==
-              1L
-            )
-              Left[ValidationError, Unit](OperationFailed)
-            else
-              Right[ValidationError, Unit](())
-          }
-      }
+    override def updatePassword(user: Customer, password: EncryptedPassword): Validated[Unit] = protectFromException {
+      if (
+        ctx.run(
+          query[Customers].filter(_.email === lift[String](user.email.value)).update(_.password -> lift[String](password.value))
+        )
+        !==
+        1L
+      )
+        Left[ValidationError, Unit](OperationFailed)
+      else
+        Right[ValidationError, Unit](())
     }
 
     override def unregister(customer: Customer): Validated[Unit] = protectFromException {

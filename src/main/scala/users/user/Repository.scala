@@ -17,5 +17,5 @@ trait Repository[A <: User] {
 
   def findPassword(user: A): Validated[EncryptedPassword]
 
-  def updatePassword(user: A, password: PlainPassword): Validated[Unit]
+  def updatePassword(user: A, password: EncryptedPassword): Validated[Unit]
 }
