@@ -15,17 +15,20 @@ import org.testcontainers.utility.DockerImageName
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+
 import java.sql.DriverManager
 import scala.concurrent.duration.{FiniteDuration, SECONDS}
-
-import users.user.valueobjects.{EncryptedPassword, Username}
+import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.storemanager.valueobjects.Store
 import users.storemanager.entities.StoreManager
 import users.ValidationError
 
+import io.github.pervasivecats.users.user.services.PasswordAlgorithm
+
 class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
   val usernameString: String = "matteo"
+  val plainPassword: String = "Password1!"
   val storeID: Long = 10
 
   val timeout: FiniteDuration = FiniteDuration(240, SECONDS)
@@ -65,18 +68,19 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
   describe("The store manager repository") {
     describe("when asked to register a store manager") {
       it("should add the entry to the database") {
-        withContainers { pgContainer =>
+        withContainers { _ =>
           for {
             username <- Username(usernameString)
             store <- Store(storeID)
           } do {
-            StoreManagerRepository.getInstance() match {
-              case Some(v) => {
-                val r = v.register(StoreManager(username, store), EncryptedPassword("p1"))
-                r shouldBe Right[ValidationError, Unit](println("store manager added"))
-              }
-              case None => fail()
-            }
+            val result = StoreManagerRepository
+              .getInstance()
+              .getOrElse(fail())
+              .register(
+                StoreManager(username, store),
+                summon[PasswordAlgorithm].encrypt(PlainPassword(plainPassword).getOrElse(fail()))
+              )
+            result shouldBe Right[ValidationError, Unit](println("store manager added"))
           }
         }
       }
@@ -84,17 +88,13 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
     describe("when asked to retrieve the store manager corresponding to a username") {
       it("should return the requested store manager") {
-        withContainers { pgContainer =>
+        withContainers { _ =>
           for {
             username <- Username(usernameString)
           } do {
-            StoreManagerRepository.getInstance() match {
-              case Some(v) => {
-                val r = v.findByUsername(username)
-                (r.getOrElse(fail()).store.value.value: Long) shouldBe storeID
-              }
-              case None => fail()
-            }
+            val result = StoreManagerRepository.getInstance().getOrElse(fail()).findByUsername(username)
+            (result.getOrElse(fail()).username.value.value: String) shouldBe usernameString
+            (result.getOrElse(fail()).store.value.value: Long) shouldBe storeID
           }
         }
       }
