@@ -29,6 +29,7 @@ import AnyOps.*
 
 trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
+  /** can yield UserNotFound validation error */
   def findByUsername(username: Username): Validated[A]
 
   def register(storeManager: A, password: EncryptedPassword): Validated[Unit]
@@ -64,8 +65,7 @@ object StoreManagerRepository {
       )
 
       r match {
-        case Failure(_: PSQLException) => Left[ValidationError, StoreManager](PSQLError)
-        case Failure(_) => Left[ValidationError, StoreManager](UnexpectedException)
+        case Failure(_) => Left[ValidationError, StoreManager](RepositoryError)
         case Success(v) =>
           v.headOption match {
             case None => Left[ValidationError, StoreManager](UserNotFound)
@@ -88,9 +88,7 @@ object StoreManagerRepository {
       )
 
       r match {
-        case Failure(e: PSQLException) if e.getSQLState === "23505" => Left[ValidationError, Unit](UniqueViolation)
-        case Failure(_: PSQLException) => Left[ValidationError, Unit](PSQLError)
-        case Failure(_) => Left[ValidationError, Unit](UnexpectedException)
+        case Failure(_) => Left[ValidationError, Unit](RepositoryError)
         case Success(_) => Right[ValidationError, Unit](println("Store manager inserted"))
       }
     }
