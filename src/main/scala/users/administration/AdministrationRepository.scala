@@ -22,8 +22,9 @@ import users.administration.AdministrationRepositoryError.*
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import users.administration.entities.Administration
-
 import AnyOps.*
+
+import users.user.services.PasswordAlgorithm
 
 import scala.Console.println
 
@@ -51,8 +52,30 @@ object AdministrationRepository {
 
     import ctx.*
 
-    override def findByUsername(username: Username): Validated[Administration] = {
+    case object OperationFailed extends ValidationError {
 
+      override val message: String = "The operation on the given customer was not correctly performed"
+    }
+
+    private def protectFromException[A](f: => Validated[A]): Validated[A] =
+      Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
+
+    private def queryByUsername(username: Username) = quote {
+      querySchema[Administrators](entity = "administrators").filter(_.username === lift[String](username.value))
+    }
+    override def findByUsername(username: Username): Validated[Administration] = protectFromException {
+      ctx
+        .run(queryByUsername(username))
+        .map(c =>
+          for {
+            u <- Username(c.username)
+          } yield Administration(u)
+        )
+        .headOption
+        .getOrElse(Left[ValidationError, Administration](UserNotFound))
+    }
+
+    /*{
       val r: Try[List[Administrators]] = Try(
         ctx.run(query[Administrators].filter(m => m.username.like(lift(username.value))))
       )
@@ -69,7 +92,7 @@ object AdministrationRepository {
               } yield Administration(username)
           }
       }
-    }
+    }*/
 
     override def findPassword(administration: Administration): Validated[EncryptedPassword] = {
       ctx
@@ -90,7 +113,25 @@ object AdministrationRepository {
             .filter(_.username === lift[String](administration.username.value))
             .update(_.password -> lift(encryptedPassword.value))
         )
-      print("User password updated")
+
+      /*summon[PasswordAlgorithm].encrypt(encryptedPassword) match {
+        case Left(e) => Left[ValidationError, Unit](e)
+        case Right(p) =>
+          protectFromException {
+            if (
+              ctx.run(
+                query[Customers]
+                  .filter(_.email === lift[String](user.email.value))
+                  .update(_.password -> lift[String](p.value))
+              )
+                !==
+                1L
+            )
+              Left[ValidationError, Unit](OperationFailed)
+            else
+              Right[ValidationError, Unit](())
+          }
+      }*/
     }
 
   }

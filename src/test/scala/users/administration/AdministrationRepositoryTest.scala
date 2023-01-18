@@ -12,11 +12,13 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
 import java.sql.DriverManager
 import scala.concurrent.duration.{FiniteDuration, SECONDS}
-import users.user.valueobjects.{EncryptedPassword, Username}
+import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.ValidationError
-
 import users.administration.AdministrationRepositoryError.UserNotFound
 import users.administration.entities.Administration
+
+import io.github.pervasivecats.users.user.Repository
+import io.github.pervasivecats.users.user.services.PasswordAlgorithm
 
 class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
 
@@ -114,6 +116,54 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
     }
   }
 
+  describe("when asked to update the password of administration"){
+    it("should update the specified password"){
+      withContainers { _ =>
+        for {
+          username <- Username("elena")
+          plainNewPassword <- PlainPassword(newPassword)
+        } do {
+
+          val encryptedNewPassword: EncryptedPassword = summon[PasswordAlgorithm].encrypt(plainNewPassword)
+
+          AdministrationRepository
+            .getInstance()
+            .getOrElse(fail())
+            .updatePassword(Administration(username),encryptedNewPassword)
+
+          val administrationCurrentPassword: EncryptedPassword = AdministrationRepository
+            .getInstance()
+            .getOrElse(fail())
+            .findPassword(Administration(username)).getOrElse(fail())
+
+          print(administrationCurrentPassword.value)
+          summon[PasswordAlgorithm]
+            .check(administrationCurrentPassword, PlainPassword(newPassword).getOrElse(fail())) shouldBe true
+        }
+      }
+    }
+  }
+
+  describe("when asked to update the password of a non-exist administration"){
+    it("should return UserNotFound"){
+      withContainers { _ =>
+        for {
+          username <- Username("nonelena")
+          plainNewPassword <- PlainPassword(newPassword)
+        } do {
+          
+          val encryptedNewPassword: EncryptedPassword = summon[PasswordAlgorithm].encrypt(plainNewPassword)
+
+          AdministrationRepository
+            .getInstance()
+            .getOrElse(fail())
+            .updatePassword(Administration(username), encryptedNewPassword)
+
+
+        }
+      }
+    }
+  }
 
 
 }
