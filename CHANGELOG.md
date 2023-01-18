@@ -1,3 +1,11 @@
+# [1.0.0-beta.3](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2023-01-18)
+
+
+### Bug Fixes
+
+* add refined type for encrypted password ([c30f675](https://github.com/pervasive-cats/toys-store-users/commit/c30f6753e9601217f4cbcc4d15248c074a7d4f52))
+* fix formatting for scalafmt and scalafix ([96901f6](https://github.com/pervasive-cats/toys-store-users/commit/96901f6208e9d219337e9da1736347ebea9d3cb3))
+
 # [1.0.0-beta.2](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2022-12-18)
 
 
