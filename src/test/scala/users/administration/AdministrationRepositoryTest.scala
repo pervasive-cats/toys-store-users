@@ -15,12 +15,13 @@ import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import users.user.valueobjects.{EncryptedPassword, Username}
 import users.ValidationError
 
-import io.github.pervasivecats.users.administration.AdministrationRepositoryError.UserNotFound
-import io.github.pervasivecats.users.administration.entities.Administration
+import users.administration.AdministrationRepositoryError.UserNotFound
+import users.administration.entities.Administration
 
 class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
 
   val usernameString: String = "elena"
+  val initialPassword: String = "Efda!dWQ"
   val newPassword: String = "PyW$s1sC"
 
   val timeout: FiniteDuration = FiniteDuration(300, SECONDS)
@@ -81,6 +82,32 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
           username <- Username("nonelena")
         } do {
           val result = AdministrationRepository.getInstance().getOrElse(fail()).findByUsername(username)
+          result shouldBe Left[ValidationError, Administration](UserNotFound)
+        }
+      }
+    }
+  }
+
+  describe("when asked to retrieve the password of administration"){
+    it("should return the requested administration password") {
+      withContainers { _ =>
+        for {
+          username <- Username("elena")
+        } do {
+          val result = AdministrationRepository.getInstance().getOrElse(fail()).findPassword(Administration(username))
+          result shouldBe Right[ValidationError, EncryptedPassword](EncryptedPassword(initialPassword))
+        }
+      }
+    }
+  }
+
+  describe("when asked to retrieve the password of a non-exist administration") {
+    it("should return UserNotFound") {
+      withContainers { _ =>
+        for {
+          username <- Username("nonelena")
+        } do {
+          val result = AdministrationRepository.getInstance().getOrElse(fail()).findPassword(Administration(username))
           result shouldBe Left[ValidationError, Administration](UserNotFound)
         }
       }
