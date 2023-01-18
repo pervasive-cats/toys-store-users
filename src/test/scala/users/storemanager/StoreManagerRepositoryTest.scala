@@ -167,7 +167,6 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
   }
 
-
   describe("when asked to update a non-existent store manager's store") {
     it("should return UserNotFound") {
       withContainers { _ =>
@@ -177,12 +176,29 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
           store <- Store(storeID)
           newStore <- Store(newStoreID)
         } do {
-          val result = StoreManagerRepository
-            .getInstance()
-            .getOrElse(fail())
-            .updateStore(StoreManager(username, store), newStore)
+          val result = StoreManagerRepository.getInstance().getOrElse(fail()).updateStore(StoreManager(username, store), newStore)
 
           result shouldBe Left[ValidationError, Unit](UserNotFound)
+        }
+      }
+    }
+  }
+
+  describe("when asked to delete a store manager") {
+    it("should delete the specified storemanager") {
+      withContainers { _ =>
+        for {
+          username <- Username(usernameString)
+          store <- Store(storeID)
+        } do {
+          val result = StoreManagerRepository.getInstance().getOrElse(fail()).unregister(StoreManager(username, store))
+
+          result shouldBe Right[ValidationError, Unit](println("Store manager deleted"))
+
+          StoreManagerRepository.getInstance().getOrElse(fail()).findByUsername(username) shouldBe Left[
+            ValidationError,
+            StoreManager
+          ](UserNotFound)
         }
       }
     }

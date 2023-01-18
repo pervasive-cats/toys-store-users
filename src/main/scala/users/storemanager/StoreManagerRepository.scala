@@ -36,7 +36,7 @@ trait StoreManagerRepository[A <: StoreManager] { // extends Repository[A] {
 
   def updateStore(storeManager: A, store: Store): Validated[Unit]
 
-//  def unregister(storeManager: A): Validated[Unit]
+  def unregister(storeManager: A): Validated[Unit]
 
 }
 
@@ -107,6 +107,19 @@ object StoreManagerRepository {
         case Failure(_) => Left[ValidationError, Unit](RepositoryError)
         case Success(0) => Left[ValidationError, Unit](UserNotFound)
         case Success(_) => Right[ValidationError, Unit](println("Store manager updated"))
+      }
+    }
+
+    override def unregister(storeManager: StoreManager): Validated[Unit] = {
+      val r = Try(
+        ctx.run(
+          query[StoreManagers].filter(m => m.username.like(lift(storeManager.username.value.value))).delete
+        )
+      )
+
+      r match {
+        case Failure(_) => Left[ValidationError, Unit](RepositoryError)
+        case Success(_) => Right[ValidationError, Unit](println("Store manager deleted"))
       }
     }
 
