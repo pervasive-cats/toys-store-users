@@ -1,26 +1,29 @@
 package io.github.pervasivecats
 package users.administration
 
-import eu.timepit.refined.auto.given
-import com.dimafeng.testcontainers.PostgreSQLContainer
+import java.sql.DriverManager
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.SECONDS
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
+import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
-import org.testcontainers.utility.DockerImageName
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import eu.timepit.refined.auto.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import org.testcontainers.utility.DockerImageName
 
-import java.sql.DriverManager
-import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.ValidationError
 import users.administration.AdministrationRepositoryError.AdministrationNotFound
 import users.administration.entities.Administration
-
 import users.user.Repository
 import users.user.services.PasswordAlgorithm
 
-class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
+class AdministrationRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
   val usernameString: String = "elena"
   val initialPassword: String = "Efda!dWQ"
@@ -90,7 +93,7 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
     }
   }
 
-  describe("when asked to retrieve the password of administration"){
+  describe("when asked to retrieve the password of administration") {
     it("should return the requested administration password") {
       withContainers { _ =>
         for {
@@ -116,8 +119,8 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
     }
   }
 
-  describe("when asked to update the password of administration"){
-    it("should update the specified password"){
+  describe("when asked to update the password of administration") {
+    it("should update the specified password") {
       withContainers { _ =>
         for {
           username <- Username("elena")
@@ -126,15 +129,13 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
 
           val encryptedNewPassword: EncryptedPassword = summon[PasswordAlgorithm].encrypt(plainNewPassword)
 
-          AdministrationRepository
-            .getInstance()
-            .getOrElse(fail())
-            .updatePassword(Administration(username),encryptedNewPassword)
+          AdministrationRepository.getInstance().getOrElse(fail()).updatePassword(Administration(username), encryptedNewPassword)
 
           val administrationCurrentPassword: EncryptedPassword = AdministrationRepository
             .getInstance()
             .getOrElse(fail())
-            .findPassword(Administration(username)).getOrElse(fail())
+            .findPassword(Administration(username))
+            .getOrElse(fail())
 
           print(administrationCurrentPassword.value)
           summon[PasswordAlgorithm]
@@ -143,6 +144,5 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
       }
     }
   }
-
 
 }

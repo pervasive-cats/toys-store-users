@@ -7,18 +7,19 @@
 package io.github.pervasivecats
 package users.administration
 
+import io.github.pervasivecats.users.administration.entities.Administration
+
 import org.mockito.Mockito.description
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
 import org.scalatest.funspec.AnyFunSpec
-import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 
-import io.github.pervasivecats.users.administration.entities.Administration
+import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 
 class AdministrationTest extends AnyFunSpec {
 
-  describe("A administration"){
-    it("must be created correctly"){
+  describe("A administration") {
+    it("must be created correctly") {
       val administration: Administration = Administration(Username("John").getOrElse(fail()))
     }
   }

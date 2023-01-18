@@ -7,26 +7,26 @@
 package io.github.pervasivecats
 package users.administration
 
+import scala.Console.println
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.auto.autoUnwrap
 import eu.timepit.refined.auto.given
 import io.getquill.*
 import org.postgresql.util.PSQLException
+
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.user.Repository
 import users.administration.AdministrationRepositoryError.*
-
-import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import users.administration.entities.Administration
 import AnyOps.*
-
 import users.user.services.PasswordAlgorithm
-
-import scala.Console.println
 
 trait AdministrationRepository[A <: Administration] {
   def findByUsername(username: Username): Validated[Administration]
@@ -35,7 +35,8 @@ trait AdministrationRepository[A <: Administration] {
 }
 
 object AdministrationRepository {
-  final private class AdministrationRepositoryImpl(port: Int) extends AdministrationRepository[Administration]{
+
+  final private class AdministrationRepositoryImpl(port: Int) extends AdministrationRepository[Administration] {
 
     final case class Administrators(username: String, password: String)
 
@@ -51,13 +52,14 @@ object AdministrationRepository {
     private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, ds)
 
     import ctx.*
-    
+
     private def protectFromException[A](f: => Validated[A]): Validated[A] =
       Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
 
     private def queryByUsername(username: Username) = quote {
       querySchema[Administrators](entity = "administrators").filter(_.username === lift[String](username.value))
     }
+
     override def findByUsername(username: Username): Validated[Administration] = protectFromException {
       ctx
         .run(queryByUsername(username))
@@ -73,25 +75,22 @@ object AdministrationRepository {
     override def findPassword(administration: Administration): Validated[EncryptedPassword] = protectFromException {
       ctx
         .run(
-          query[Administrators]
-            .filter(_.username === lift[String](administration.username.value))
-            .map(_.password)
+          query[Administrators].filter(_.username === lift[String](administration.username.value)).map(_.password)
         )
         .map(EncryptedPassword(_))
         .headOption
         .toRight[ValidationError](AdministrationNotFound)
     }
 
-    override def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword):
-    Validated[Unit] = {
+    override def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Validated[Unit] = {
       if (
         ctx.run(
           query[Administrators]
             .filter(_.username === lift[String](administration.username.value))
             .update(_.password -> lift[String](encryptedPassword.value))
         )
-          !==
-          1L
+        !==
+        1L
       )
         Left[ValidationError, Unit](OperationFailed)
       else

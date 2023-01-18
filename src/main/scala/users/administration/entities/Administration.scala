@@ -7,13 +7,13 @@
 package io.github.pervasivecats
 package users.administration.entities
 
+import eu.timepit.refined.api.RefType.applyRef
+
 import users.administration.entities.Administration
 import users.user.entities.User
 import users.user.valueobjects.Username.WrongUsernameFormat
 import users.user.valueobjects.{PlainPassword, Username}
 import users.{Validated, ValidationError}
-
-import eu.timepit.refined.api.RefType.applyRef
 
 trait Administration extends User
 
