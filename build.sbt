@@ -4,7 +4,9 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / excludeLintKeys := Set(idePackagePrefix)
 
-ThisBuild / scalaVersion := "3.2.1"
+Test / fork := true
+
+ThisBuild / scalaVersion := "3.2.2-RC2"
 
 ThisBuild / scalafixDependencies ++= Seq(
   "com.github.liancheng" %% "organize-imports" % "0.6.0",
@@ -32,7 +34,9 @@ lazy val root = project
       refined,
       bcrypt,
       quill,
-      postgresql
+      postgresql,
+      testContainers,
+      testContainersPostgresql
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
     version := "0.0.0",

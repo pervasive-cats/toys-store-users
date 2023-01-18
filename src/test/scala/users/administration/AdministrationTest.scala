@@ -11,8 +11,9 @@ import org.mockito.Mockito.description
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
 import org.scalatest.funspec.AnyFunSpec
-
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
+
+import io.github.pervasivecats.users.administration.entities.Administration
 
 class AdministrationTest extends AnyFunSpec {
 
