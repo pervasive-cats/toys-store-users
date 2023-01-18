@@ -14,11 +14,11 @@ import java.sql.DriverManager
 import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.ValidationError
-import users.administration.AdministrationRepositoryError.UserNotFound
+import users.administration.AdministrationRepositoryError.AdministrationNotFound
 import users.administration.entities.Administration
 
-import io.github.pervasivecats.users.user.Repository
-import io.github.pervasivecats.users.user.services.PasswordAlgorithm
+import users.user.Repository
+import users.user.services.PasswordAlgorithm
 
 class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
 
@@ -84,7 +84,7 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
           username <- Username("nonelena")
         } do {
           val result = AdministrationRepository.getInstance().getOrElse(fail()).findByUsername(username)
-          result shouldBe Left[ValidationError, Administration](UserNotFound)
+          result shouldBe Left[ValidationError, Administration](AdministrationNotFound)
         }
       }
     }
@@ -110,7 +110,7 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
           username <- Username("nonelena")
         } do {
           val result = AdministrationRepository.getInstance().getOrElse(fail()).findPassword(Administration(username))
-          result shouldBe Left[ValidationError, Administration](UserNotFound)
+          result shouldBe Left[ValidationError, Administration](AdministrationNotFound)
         }
       }
     }
@@ -139,27 +139,6 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
           print(administrationCurrentPassword.value)
           summon[PasswordAlgorithm]
             .check(administrationCurrentPassword, PlainPassword(newPassword).getOrElse(fail())) shouldBe true
-        }
-      }
-    }
-  }
-
-  describe("when asked to update the password of a non-exist administration"){
-    it("should return UserNotFound"){
-      withContainers { _ =>
-        for {
-          username <- Username("nonelena")
-          plainNewPassword <- PlainPassword(newPassword)
-        } do {
-          
-          val encryptedNewPassword: EncryptedPassword = summon[PasswordAlgorithm].encrypt(plainNewPassword)
-
-          AdministrationRepository
-            .getInstance()
-            .getOrElse(fail())
-            .updatePassword(Administration(username), encryptedNewPassword)
-
-
         }
       }
     }

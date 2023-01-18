@@ -31,7 +31,7 @@ import scala.Console.println
 trait AdministrationRepository[A <: Administration] {
   def findByUsername(username: Username): Validated[Administration]
   def findPassword(administration: Administration): Validated[EncryptedPassword]
-  def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Unit
+  def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Validated[Unit]
 }
 
 object AdministrationRepository {
@@ -51,12 +51,7 @@ object AdministrationRepository {
     private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, ds)
 
     import ctx.*
-
-    case object OperationFailed extends ValidationError {
-
-      override val message: String = "The operation on the given customer was not correctly performed"
-    }
-
+    
     private def protectFromException[A](f: => Validated[A]): Validated[A] =
       Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
 
@@ -72,29 +67,10 @@ object AdministrationRepository {
           } yield Administration(u)
         )
         .headOption
-        .getOrElse(Left[ValidationError, Administration](UserNotFound))
+        .getOrElse(Left[ValidationError, Administration](AdministrationNotFound))
     }
 
-    /*{
-      val r: Try[List[Administrators]] = Try(
-        ctx.run(query[Administrators].filter(m => m.username.like(lift(username.value))))
-      )
-
-      r match {
-        case Failure(_: PSQLException) => Left[ValidationError, Administration](PSQLError)
-        case Failure(_) => Left[ValidationError, Administration](UnexpectedException)
-        case Success(v) =>
-          v.headOption match {
-            case None => Left[ValidationError, Administration](UserNotFound)
-            case Some(sm) =>
-              for {
-                username <- Username(sm.username)
-              } yield Administration(username)
-          }
-      }
-    }*/
-
-    override def findPassword(administration: Administration): Validated[EncryptedPassword] = {
+    override def findPassword(administration: Administration): Validated[EncryptedPassword] = protectFromException {
       ctx
         .run(
           query[Administrators]
@@ -103,35 +79,23 @@ object AdministrationRepository {
         )
         .map(EncryptedPassword(_))
         .headOption
-        .toRight[ValidationError](UserNotFound)
+        .toRight[ValidationError](AdministrationNotFound)
     }
 
-    override def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Unit = {
-      ctx
-        .run(
+    override def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword):
+    Validated[Unit] = {
+      if (
+        ctx.run(
           query[Administrators]
             .filter(_.username === lift[String](administration.username.value))
-            .update(_.password -> lift(encryptedPassword.value))
+            .update(_.password -> lift[String](encryptedPassword.value))
         )
-
-      /*summon[PasswordAlgorithm].encrypt(encryptedPassword) match {
-        case Left(e) => Left[ValidationError, Unit](e)
-        case Right(p) =>
-          protectFromException {
-            if (
-              ctx.run(
-                query[Customers]
-                  .filter(_.email === lift[String](user.email.value))
-                  .update(_.password -> lift[String](p.value))
-              )
-                !==
-                1L
-            )
-              Left[ValidationError, Unit](OperationFailed)
-            else
-              Right[ValidationError, Unit](())
-          }
-      }*/
+          !==
+          1L
+      )
+        Left[ValidationError, Unit](OperationFailed)
+      else
+        Right[ValidationError, Unit](())
     }
 
   }
@@ -143,7 +107,7 @@ object AdministrationRepository {
 
   def apply(port: Int): AdministrationRepository[Administration] = instance match {
 
-    case Some(v) if v !=== port =>
+    case Some(v) if v !== port =>
       System.err.println("AdministrationRepository already initialized with different port")
       v
 
