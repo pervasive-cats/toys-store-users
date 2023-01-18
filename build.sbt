@@ -14,6 +14,8 @@ ThisBuild / scalafixDependencies ++= Seq(
 
 ThisBuild / idePackagePrefix := Some("io.github.pervasivecats")
 
+Test / fork := true
+
 lazy val root = project
   .in(file("."))
   .enablePlugins(AutomateHeaderPlugin)
@@ -32,7 +34,9 @@ lazy val root = project
       refined,
       bcrypt,
       quill,
-      postgresql
+      postgresql,
+      testContainers,
+      testContainersPostgresql
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
     version := "1.0.0-beta.2",
