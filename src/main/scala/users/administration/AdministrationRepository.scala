@@ -20,8 +20,10 @@ import users.{Validated, ValidationError}
 import users.user.Repository
 import users.administration.AdministrationRepositoryError.*
 
-import io.getquill.extras.===
-import io.github.pervasivecats.users.administration.entities.Administration
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import users.administration.entities.Administration
+
+import AnyOps.*
 
 import scala.Console.println
 
@@ -32,11 +34,21 @@ trait AdministrationRepository[A <: Administration] {
 }
 
 object AdministrationRepository {
+  final private class AdministrationRepositoryImpl(port: Int) extends AdministrationRepository[Administration]{
 
-  case class Administrators(username: String, password: String)
+    final case class Administrators(username: String, password: String)
 
-  given AdministrationRepository[Administration] with {
-    private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, "ctx")
+    private val config = new HikariConfig()
+    config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource")
+    config.addDataSourceProperty("user", "ismam")
+    config.addDataSourceProperty("password", "ismam")
+    config.addDataSourceProperty("databaseName", "users")
+    config.addDataSourceProperty("portNumber", port)
+
+    private val ds = new HikariDataSource(config)
+
+    private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, ds)
+
     import ctx.*
 
     override def findByUsername(username: Username): Validated[Administration] = {
@@ -78,42 +90,27 @@ object AdministrationRepository {
             .filter(_.username === lift[String](administration.username.value))
             .update(_.password -> lift(encryptedPassword.value))
         )
-        print("User password updated")
+      print("User password updated")
     }
-  }
-}
 
-
-@main
-def launch(): Unit = {
-  updatePassword()
-}
-
-def testFindByUsername(): Unit = {
-  for {
-    username <- Username("elena")
-  } do {
-    val r = summon[AdministrationRepository[Administration]].findByUsername(username)
-    print(r)
   }
 
-}
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
+  private var instance: Option[AdministrationRepositoryImpl] = None
 
-def testFindPassword(): Unit = {
-  for {
-    username <- Username("elena")
-  } do {
-    val r = summon[AdministrationRepository[Administration]].findPassword(Administration(username))
-    print(r)
+  def getInstance(): Option[AdministrationRepository[Administration]] = instance
+
+  def apply(port: Int): AdministrationRepository[Administration] = instance match {
+
+    case Some(v) if v !=== port =>
+      System.err.println("AdministrationRepository already initialized with different port")
+      v
+
+    case Some(v) => v
+    case None =>
+      val s = AdministrationRepositoryImpl(port)
+      instance = Some(s)
+      s
   }
 
-}
-
-def updatePassword(): Unit = {
-  for {
-    username <- Username("elena")
-  } do {
-    val r = summon[AdministrationRepository[Administration]]
-      .updatePassword(Administration(username),EncryptedPassword("PyW$s1sC"))
-  }
 }

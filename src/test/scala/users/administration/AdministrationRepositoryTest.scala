@@ -17,8 +17,8 @@ import users.ValidationError
 
 class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
 
-  val usernameString: String = "matteo"
-  val storeID: Long = 10
+  val usernameString: String = "elena"
+  val newPassword: String = "PyW$s1sC"
 
   val timeout: FiniteDuration = FiniteDuration(300, SECONDS)
 
@@ -28,10 +28,32 @@ class AdministrationRepositoryTest  extends AnyFunSpec with TestContainerForAll{
   override val containerDef: PostgreSQLContainer.Def = PostgreSQLContainer.Def(
     dockerImageName = DockerImageName.parse("postgres:15.1"),
     databaseName = "users",
-    username = "test",
-    password = "test",
+    username = "ismam",
+    password = "ismam",
     commonJdbcParams = initScriptParam
   )
+
+  @SuppressWarnings(Array("org.wartremover.warts.AutoUnboxing"))
+  override def afterContainersStart(container: Containers): Unit = {
+    super.afterContainersStart(container)
+
+    container match {
+      case c: PostgreSQLContainer => AdministrationRepository(c.container.getFirstMappedPort)
+    }
+  }
+
+  describe("A PostgreSQL container") {
+    describe("when started") {
+      it("should stay connected") {
+        withContainers { pgContainer =>
+          Class.forName(pgContainer.driverClassName)
+          val connection = DriverManager.getConnection(pgContainer.jdbcUrl, pgContainer.username, pgContainer.password)
+          assert(!connection.isClosed)
+        }
+      }
+    }
+  }
+
 
 
 }
