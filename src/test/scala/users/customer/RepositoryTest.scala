@@ -112,7 +112,8 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
           newCustomer.lastName,
           newCustomer.email,
           newCustomer.username
-        ).left.value shouldBe OperationFailed
+        ).left
+          .value shouldBe OperationFailed
       }
     }
 
