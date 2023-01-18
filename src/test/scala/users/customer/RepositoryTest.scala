@@ -75,7 +75,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       }
     }
 
-    describe("after being registered and then their data updated") {
+    describe("after being registered and then their data gets updated") {
       it("should show the update") {
         val db: Repository = repository.getOrElse(fail())
         val newCustomer: Customer = customer.updated(
@@ -97,14 +97,47 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       }
     }
 
-    describe("after being registered and their password updated") {
+    describe("when their data gets updated but they were never registered in the first place") {
+      it("should not be allowed") {
+        val db: Repository = repository.getOrElse(fail())
+        val newCustomer: Customer = customer.updated(
+          Email("luigi@mail.com").getOrElse(fail()),
+          NameComponent("Luigi").getOrElse(fail()),
+          NameComponent("Bianchi").getOrElse(fail()),
+          Username("l0033gi").getOrElse(fail())
+        )
+        db.updateData(
+          customer,
+          newCustomer.firstName,
+          newCustomer.lastName,
+          newCustomer.email,
+          newCustomer.username
+        ).left.value shouldBe OperationFailed
+      }
+    }
+
+    describe("after being registered and their password gets updated") {
       it("should show the update") {
         val db: Repository = repository.getOrElse(fail())
-        val newPassword: PlainPassword = PlainPassword("passWORD2?").getOrElse(fail())
+        val newPassword: EncryptedPassword =
+          summon[PasswordAlgorithm]
+            .encrypt(PlainPassword("passWORD2?").getOrElse(fail()))
+            .getOrElse(fail())
         db.register(customer, password).getOrElse(fail())
         db.updatePassword(customer, newPassword).getOrElse(fail())
-        summon[PasswordAlgorithm].check(db.findPassword(customer).value, newPassword) shouldBe true
+        db.findPassword(customer).value shouldBe newPassword
         db.unregister(customer).getOrElse(fail())
+      }
+    }
+
+    describe("when their password gets updated but they were never registered in the first place") {
+      it("should not be allowed") {
+        val db: Repository = repository.getOrElse(fail())
+        val newPassword: EncryptedPassword =
+          summon[PasswordAlgorithm]
+            .encrypt(PlainPassword("passWORD2?").getOrElse(fail()))
+            .getOrElse(fail())
+        db.updatePassword(customer, newPassword).left.value shouldBe OperationFailed
       }
     }
 
@@ -112,6 +145,8 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       it("should not be present") {
         val db: Repository = repository.getOrElse(fail())
         db.findByEmail(email).left.value shouldBe CustomerNotFound
+        db.findPassword(customer).left.value shouldBe CustomerNotFound
+        db.unregister(customer).left.value shouldBe OperationFailed
       }
     }
 
