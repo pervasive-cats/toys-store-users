@@ -7,6 +7,8 @@
 package io.github.pervasivecats
 package users.user
 
+import eu.timepit.refined.auto.given
+import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
@@ -21,13 +23,13 @@ class DefaultPasswordAlgorithmTest extends AnyFunSpec {
   describe("A password algorithm") {
     describe("when used to encode a password") {
       it("should provide a password encoded in the correct format") {
-        defaultPasswordAlgorithm.encrypt(password).value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
+        defaultPasswordAlgorithm.encrypt(password).value.value should fullyMatch regex "\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}"
       }
     }
 
     describe("when used for checking a password against the correct one") {
       it("should return true") {
-        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password), password) shouldBe true
+        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password).value, password) shouldBe true
       }
     }
 
@@ -35,7 +37,7 @@ class DefaultPasswordAlgorithmTest extends AnyFunSpec {
       it("should return false") {
         val wrongPassword: PlainPassword = PlainPassword("Password2!").getOrElse(fail())
 
-        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password), wrongPassword) shouldBe false
+        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password).value, wrongPassword) shouldBe false
       }
     }
   }

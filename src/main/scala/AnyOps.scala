@@ -6,14 +6,18 @@
 
 package io.github.pervasivecats
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals", "scalafix:DisableSyntax.=="))
+import scala.annotation.targetName
+import scala.annotation.unused
+
 object AnyOps {
 
   extension [A](self: A) {
 
+    @targetName("equals")
+    @SuppressWarnings(Array("org.wartremover.warts.Equals", "scalafix:DisableSyntax.=="))
     def ===(other: A): Boolean = self == other
 
-    def !===(other: A): Boolean = !(self === other)
+    @targetName("notEquals")
+    def !==(other: A): Boolean = !(self === other)
   }
-
 }
