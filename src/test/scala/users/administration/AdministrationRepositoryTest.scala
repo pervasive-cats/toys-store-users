@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2022-2023 by Pervasive Cats S.r.l.s.
+ *
+ * All Rights Reserved.
+ */
+
 package io.github.pervasivecats
 package users.administration
 
@@ -65,7 +71,7 @@ class AdministrationRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
   describe("when asked to retrieve the administration corresponding to a username") {
     it("should return the requested administration") {
-      withContainers { pgContainer =>
+      withContainers { _ =>
         for {
           username <- Username(usernameString)
         } do {
