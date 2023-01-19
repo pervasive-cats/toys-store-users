@@ -90,7 +90,7 @@ class AdministrationRepositoryTest extends AnyFunSpec with TestContainerForAll {
     it("should return UserNotFound") {
       withContainers { _ =>
         for {
-          username <- Username("nonelena")
+          username <- Username("non-elena")
         } do {
           val result = AdministrationRepository.getInstance().getOrElse(fail()).findByUsername(username)
           result shouldBe Left[ValidationError, Administration](AdministrationNotFound)
@@ -116,7 +116,7 @@ class AdministrationRepositoryTest extends AnyFunSpec with TestContainerForAll {
     it("should return UserNotFound") {
       withContainers { _ =>
         for {
-          username <- Username("nonelena")
+          username <- Username("non-elena")
         } do {
           val result = AdministrationRepository.getInstance().getOrElse(fail()).findPassword(Administration(username))
           result shouldBe Left[ValidationError, Administration](AdministrationNotFound)
