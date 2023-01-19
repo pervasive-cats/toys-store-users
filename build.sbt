@@ -5,7 +5,6 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / excludeLintKeys := Set(idePackagePrefix)
 
 Test / fork := true
-
 ThisBuild / scalaVersion := "3.2.2-RC2"
 
 ThisBuild / scalafixDependencies ++= Seq(
@@ -15,6 +14,8 @@ ThisBuild / scalafixDependencies ++= Seq(
 )
 
 ThisBuild / idePackagePrefix := Some("io.github.pervasivecats")
+
+Test / fork := true
 
 lazy val root = project
   .in(file("."))
@@ -39,7 +40,7 @@ lazy val root = project
       testContainersPostgresql
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
-    version := "1.0.0-beta.2",
+    version := "1.0.0-beta.4",
     coverageEnabled := true,
     coverageMinimumStmtTotal := 80,
     coverageMinimumBranchTotal := 80,
