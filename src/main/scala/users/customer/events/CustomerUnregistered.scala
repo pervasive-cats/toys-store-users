@@ -7,7 +7,7 @@
 package io.github.pervasivecats
 package users.customer.events
 
-import users.customer.valeuobjects.Email
+import users.customer.valueobjects.Email
 
 trait CustomerUnregistered {
 

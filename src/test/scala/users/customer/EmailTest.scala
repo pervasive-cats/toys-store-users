@@ -12,8 +12,8 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.customer.valeuobjects.Email
-import users.customer.valeuobjects.Email.WrongEmailFormat
+import users.customer.valueobjects.Email
+import users.customer.valueobjects.Email.WrongEmailFormat
 
 class EmailTest extends AnyFunSpec {
 

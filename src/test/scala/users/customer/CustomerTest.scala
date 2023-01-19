@@ -13,7 +13,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
 import users.customer.entities.Customer
-import users.customer.valeuobjects.{Email, NameComponent}
+import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.Username
 import users.customer.entities.CustomerOps.updated
 

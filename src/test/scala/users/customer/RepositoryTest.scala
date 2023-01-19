@@ -21,7 +21,7 @@ import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
 import users.customer.entities.Customer
-import users.customer.valeuobjects.{Email, NameComponent}
+import users.customer.valueobjects.{Email, NameComponent}
 import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound, OperationFailed}
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.*

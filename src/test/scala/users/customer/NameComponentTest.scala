@@ -12,8 +12,8 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.customer.valeuobjects.NameComponent
-import users.customer.valeuobjects.NameComponent.WrongNameComponentFormat
+import users.customer.valueobjects.NameComponent
+import users.customer.valueobjects.NameComponent.WrongNameComponentFormat
 
 class NameComponentTest extends AnyFunSpec {
 

@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.customer.valeuobjects
+package users.customer.valueobjects
 
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.api.Refined

@@ -16,7 +16,7 @@ import io.getquill.*
 
 import users.{Validated, ValidationError}
 import users.customer.entities.Customer
-import users.customer.valeuobjects.{Email, NameComponent}
+import users.customer.valueobjects.{Email, NameComponent}
 import users.user.Repository as UserRepository
 import users.user.valueobjects.*
 import AnyOps.*

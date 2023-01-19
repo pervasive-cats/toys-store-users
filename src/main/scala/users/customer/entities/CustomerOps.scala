@@ -7,7 +7,7 @@
 package io.github.pervasivecats
 package users.customer.entities
 
-import users.customer.valeuobjects.{Email, NameComponent}
+import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.Username
 
 trait CustomerOps[A <: Customer] {
