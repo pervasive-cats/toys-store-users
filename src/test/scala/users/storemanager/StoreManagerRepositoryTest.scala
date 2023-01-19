@@ -8,14 +8,17 @@ package io.github.pervasivecats
 package users.storemanager
 
 import java.sql.DriverManager
+
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.SECONDS
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.auto.given
+import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
@@ -30,9 +33,17 @@ import users.user.services.PasswordAlgorithm
 
 class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
-  val usernameString: String = "matteo"
-  val plainPassword: String = "Password1!"
-  val storeID: Long = 10
+  private val usernameString: String = "matteo"
+  private val storeID: Long = 10
+  private val newStoreID: Long = 99
+
+  private val username: Username = Username(usernameString).getOrElse(fail())
+  private val wrongUsername: Username = Username("nonmatteo").getOrElse(fail())
+  private val store: Store = Store(storeID).getOrElse(fail())
+  private val newStore: Store = Store(newStoreID).getOrElse(fail())
+
+  private val password: EncryptedPassword =
+    summon[PasswordAlgorithm].encrypt(PlainPassword("Password1!").getOrElse(fail())).getOrElse(fail())
 
   val timeout: FiniteDuration = FiniteDuration(300, SECONDS)
 
@@ -48,7 +59,7 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
-  private var repository: Option[Repository[StoreManager]] = None
+  private var repository: Option[Repository] = None
 
   override def afterContainersStart(containers: Containers): Unit =
     repository = Some(Repository.withPort(containers.container.getFirstMappedPort.intValue()))
@@ -68,117 +79,123 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
   describe("The store manager repository") {
     describe("when asked to register a store manager") {
       it("should add the entry to the database") {
-        withContainers { _ =>
-          for {
-            username <- Username(usernameString)
-            store <- Store(storeID)
-          } do {
-            val result = repository
-              .getOrElse(fail())
-              .register(
-                StoreManager(username, store),
-                summon[PasswordAlgorithm].encrypt(PlainPassword(plainPassword).getOrElse(fail())).getOrElse(fail())
-              )
-            result shouldBe Right[ValidationError, Unit](println("store manager added"))
-          }
-        }
+        val result = repository
+          .getOrElse(fail())
+          .register(
+            StoreManager(username, store),
+            password
+          )
+        result shouldBe Right[ValidationError, Unit](())
       }
     }
 
     describe("when asked to register a store manager that already exists") {
       it("should return StoreManagerAlreadyPresent") {
-        withContainers { _ =>
-          for {
-            username <- Username(usernameString)
-            store <- Store(storeID)
-          } do {
-            repository
-              .getOrElse(fail())
-              .register(
-                StoreManager(username, store),
-                summon[PasswordAlgorithm].encrypt(PlainPassword(plainPassword).getOrElse(fail())).getOrElse(fail())
-              ) shouldBe Left[ValidationError, Unit](StoreManagerAlreadyPresent)
-          }
-        }
+        repository
+          .getOrElse(fail())
+          .register(
+            StoreManager(username, store),
+            password
+          ) shouldBe Left[ValidationError, Unit](StoreManagerAlreadyPresent)
       }
     }
 
     describe("when asked to retrieve the store manager corresponding to a username") {
       it("should return the requested store manager") {
-        withContainers { _ =>
-          for {
-            username <- Username(usernameString)
-          } do {
-            val result = repository.getOrElse(fail()).findByUsername(username)
-            (result.getOrElse(fail()).username.value.value: String) shouldBe usernameString
-            (result.getOrElse(fail()).store.value.value: Long) shouldBe storeID
-          }
-        }
+        val result = repository.getOrElse(fail()).findByUsername(username)
+        (result.getOrElse(fail()).username.value.value: String) shouldBe usernameString
+        (result.getOrElse(fail()).store.value.value: Long) shouldBe storeID
       }
     }
 
     describe("when asked to retrieve a non-existent store manager") {
-      it("should return UserNotFound") {
-        withContainers { _ =>
-          for {
-            username <- Username("nonmatteo")
-          } do {
-            repository.getOrElse(fail()).findByUsername(username) shouldBe Left[ValidationError, StoreManager](
-              StoreManagerNotFound
-            )
-          }
-        }
+      it("should return StoreManagerNotFound") {
+        repository.getOrElse(fail()).findByUsername(wrongUsername) shouldBe Left[ValidationError, StoreManager](
+          StoreManagerNotFound
+        )
       }
     }
 
     describe("when asked to update a store manager's store") {
       it("should correctly update the store") {
-        withContainers { _ =>
-          val newStoreID: Long = 99
-          for {
-            username <- Username(usernameString)
-            store <- Store(storeID)
-            newStore <- Store(newStoreID)
-          } do {
-            repository.getOrElse(fail()).updateStore(StoreManager(username, store), newStore) shouldBe Right[
-              ValidationError,
-              Unit
-            ](())
-            (repository.getOrElse(fail()).findByUsername(username).getOrElse(fail()).store.value.value: Long) shouldBe newStoreID
-          }
-        }
+        repository.getOrElse(fail()).updateStore(StoreManager(username, store), newStore) shouldBe Right[
+          ValidationError,
+          Unit
+        ](())
+
+        (repository.getOrElse(fail()).findByUsername(username).getOrElse(fail()).store.value.value: Long) shouldBe newStoreID
+      }
+    }
+
+    describe("when asked to update a non-existent store manager's store") {
+      it("should return OperationFailed") {
+        repository.getOrElse(fail()).updateStore(StoreManager(wrongUsername, store), newStore) shouldBe Left[
+          ValidationError,
+          Unit
+        ](
+          OperationFailed
+        )
+      }
+    }
+
+    describe("when asked to retrieve a store manager's password") {
+      it("should return the requested password") {
+        repository.getOrElse(fail()).findPassword(StoreManager(username, store)) shouldBe Right[
+          ValidationError,
+          EncryptedPassword
+        ](password)
+      }
+    }
+
+    describe("when asked to retrieve a non-existent store manager's password") {
+      it("should return StoreManagerNotFound") {
+        repository.getOrElse(fail()).findPassword(StoreManager(wrongUsername, store)) shouldBe Left[
+          ValidationError,
+          EncryptedPassword
+        ](StoreManagerNotFound)
+      }
+    }
+
+    describe("when asked to update a store manager's password") {
+      it("should correctly update the password") {
+        val newPassword: EncryptedPassword =
+          summon[PasswordAlgorithm].encrypt(PlainPassword("NewPassword1!").getOrElse(fail())).getOrElse(fail())
+
+        repository.getOrElse(fail()).updatePassword(StoreManager(username, store), newPassword) shouldBe Right[
+          ValidationError,
+          Unit
+        ](())
+
+        repository.getOrElse(fail()).findPassword(StoreManager(username, store)).value shouldBe newPassword
+      }
+    }
+
+    describe("when asked to update a non-existent store manager's password") {
+      it("should return OperationFailed") {
+        val newPassword: EncryptedPassword =
+          summon[PasswordAlgorithm].encrypt(PlainPassword("NewPassword1!").getOrElse(fail())).getOrElse(fail())
+
+        repository.getOrElse(fail()).updatePassword(StoreManager(wrongUsername, store), newPassword) shouldBe Left[
+          ValidationError,
+          EncryptedPassword
+        ](OperationFailed)
+      }
+    }
+
+    describe("when asked to delete a store manager") {
+      it("should delete the specified store manager") {
+        repository.getOrElse(fail()).unregister(StoreManager(username, store)) shouldBe Right[ValidationError, Unit](())
+        repository.getOrElse(fail()).findByUsername(username) shouldBe Left[ValidationError, StoreManager](StoreManagerNotFound)
+      }
+    }
+
+    describe("when asked to delete a non-existent store manager") {
+      it("should return OperationFailed") {
+        repository.getOrElse(fail()).unregister(StoreManager(wrongUsername, store)) shouldBe Left[ValidationError, StoreManager](
+          OperationFailed
+        )
       }
     }
   }
 
-  describe("when asked to update a non-existent store manager's store") {
-    it("should return StoreManagerNotFound") {
-      withContainers { _ =>
-        val newStoreID: Long = 99
-        for {
-          username <- Username("nonmatteo")
-          store <- Store(storeID)
-          newStore <- Store(newStoreID)
-        } do {
-          repository.getOrElse(fail()).updateStore(StoreManager(username, store), newStore) shouldBe Left[ValidationError, Unit](
-            OperationFailed
-          )
-        }
-      }
-    }
-  }
-
-  describe("when asked to delete a store manager") {
-    it("should delete the specified storemanager") {
-      withContainers { _ =>
-        for {
-          username <- Username(usernameString)
-          store <- Store(storeID)
-        } do {
-          repository.getOrElse(fail()).unregister(StoreManager(username, store)) shouldBe Right[ValidationError, Unit](())
-          repository.getOrElse(fail()).findByUsername(username) shouldBe Left[ValidationError, StoreManager](StoreManagerNotFound)
-        }
-      }
-    }
-  }
 }

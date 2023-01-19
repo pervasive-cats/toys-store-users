@@ -7,7 +7,12 @@
 package io.github.pervasivecats
 package users.storemanager
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigValueFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.api.RefType.applyRef
@@ -20,21 +25,19 @@ import users.storemanager.entities.StoreManager
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.storemanager.valueobjects.Store
-import users.user.Repository
+import users.user.Repository as UserRepository
 import AnyOps.*
 
-import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
+trait Repository extends UserRepository[StoreManager] {
 
-trait Repository[A <: StoreManager] { // extends Repository[A] {
+    /** can yield UserNotFound validation error */
+  def findByUsername(username: Username): Validated[StoreManager]
 
-  /** can yield UserNotFound validation error */
-  def findByUsername(username: Username): Validated[A]
+  def register(storeManager: StoreManager, password: EncryptedPassword): Validated[Unit]
 
-  def register(storeManager: A, password: EncryptedPassword): Validated[Unit]
+  def updateStore(storeManager: StoreManager, store: Store): Validated[Unit]
 
-  def updateStore(storeManager: A, store: Store): Validated[Unit]
-
-  def unregister(storeManager: A): Validated[Unit]
+  def unregister(storeManager: StoreManager): Validated[Unit]
 
 }
 
@@ -55,7 +58,7 @@ object Repository {
     override val message: String = "The operation on the given store manager has failed"
   }
 
-  private class PostgresRepository(ctx: PostgresJdbcContext[SnakeCase]) extends Repository[StoreManager] {
+  private class PostgresRepository(ctx: PostgresJdbcContext[SnakeCase]) extends Repository {
 
     import ctx.*
 
@@ -107,18 +110,32 @@ object Repository {
         Right[ValidationError, Unit](())
     }
 
+    override def findPassword(user: StoreManager): Validated[EncryptedPassword] = protectFromException {
+      ctx
+        .run(queryByUsername(user.username).map(_.password))
+        .map(EncryptedPassword(_))
+        .headOption
+        .getOrElse(Left[ValidationError, EncryptedPassword](StoreManagerNotFound))
+    }
+
+    override def updatePassword(user: StoreManager, password: EncryptedPassword): Validated[Unit] = protectFromException {
+      if (ctx.run(queryByUsername(user.username).update(_.password -> lift[String](password.value))) !== 1L)
+        Left[ValidationError, Unit](OperationFailed)
+      else
+        Right[ValidationError, Unit](())
+    }
+
     override def unregister(storeManager: StoreManager): Validated[Unit] = protectFromException {
       if (ctx.run(queryByUsername(storeManager.username).delete) !== 1L)
         Left[ValidationError, Unit](OperationFailed)
       else
         Right[ValidationError, Unit](())
     }
-
   }
 
-  def apply: Repository[StoreManager] = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, "ctx"))
+  def apply: Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, "ctx"))
 
-  def withPort(port: Int): Repository[StoreManager] =
+  def withPort(port: Int): Repository =
     PostgresRepository(
       PostgresJdbcContext[SnakeCase](
         SnakeCase,
