@@ -12,6 +12,8 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigValueFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.api.RefType.applyRef
@@ -25,33 +27,23 @@ import users.{Validated, ValidationError}
 import users.user.Repository
 import users.administration.AdministrationRepositoryError.*
 import users.administration.entities.Administration
+import users.user.Repository as UserRepository
 import AnyOps.*
 import users.user.services.PasswordAlgorithm
 
-trait AdministrationRepository[A <: Administration] {
+trait Repository extends UserRepository[Administration] {
   def findByUsername(username: Username): Validated[Administration]
   def findPassword(administration: Administration): Validated[EncryptedPassword]
   def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Validated[Unit]
 }
 
-object AdministrationRepository {
+object Repository {
 
-  final private class AdministrationRepositoryImpl(port: Int) extends AdministrationRepository[Administration] {
-
-    final case class Administrators(username: String, password: String)
-
-    private val config = new HikariConfig()
-    config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource")
-    config.addDataSourceProperty("user", "ismam")
-    config.addDataSourceProperty("password", "ismam")
-    config.addDataSourceProperty("databaseName", "users")
-    config.addDataSourceProperty("portNumber", port)
-
-    private val ds = new HikariDataSource(config)
-
-    private val ctx = PostgresJdbcContext[SnakeCase](SnakeCase, ds)
+  final private class PostgresRepository(ctx: PostgresJdbcContext[SnakeCase]) extends Repository {
 
     import ctx.*
+
+    private case class Administrators(username: String, password: String)
 
     private def protectFromException[A](f: => Validated[A]): Validated[A] =
       Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
@@ -99,22 +91,14 @@ object AdministrationRepository {
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
-  private var instance: Option[AdministrationRepositoryImpl] = None
+  def apply: Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, "ctx"))
 
-  def getInstance(): Option[AdministrationRepository[Administration]] = instance
-
-  def apply(port: Int): AdministrationRepository[Administration] = instance match {
-
-    case Some(v) if v !== port =>
-      System.err.println("AdministrationRepository already initialized with different port")
-      v
-
-    case Some(v) => v
-    case None =>
-      val s = AdministrationRepositoryImpl(port)
-      instance = Some(s)
-      s
-  }
+  def withPort(port: Int): Repository =
+    PostgresRepository(
+      PostgresJdbcContext[SnakeCase](
+        SnakeCase,
+        ConfigFactory.load().getConfig("ctx").withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(port))
+      )
+    )
 
 }
