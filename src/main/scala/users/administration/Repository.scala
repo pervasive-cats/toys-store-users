@@ -25,7 +25,6 @@ import org.postgresql.util.PSQLException
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.user.Repository
-import users.administration.RepositoryError.*
 import users.administration.entities.Administration
 import users.user.Repository as UserRepository
 import AnyOps.*
@@ -38,6 +37,14 @@ trait Repository extends UserRepository[Administration] {
 }
 
 object Repository {
+
+  case object AdministrationNotFound extends ValidationError {
+    override val message: String = "No user found for the username that was provided"
+  }
+
+  case object OperationFailed extends ValidationError {
+    override val message: String = "The operation on the given customer was not correctly performed"
+  }
 
   final private class PostgresRepository(ctx: PostgresJdbcContext[SnakeCase]) extends Repository {
 

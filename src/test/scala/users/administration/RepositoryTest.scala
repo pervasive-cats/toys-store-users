@@ -8,10 +8,8 @@ package io.github.pervasivecats
 package users.administration
 
 import java.sql.DriverManager
-
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.SECONDS
-
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
@@ -21,13 +19,13 @@ import eu.timepit.refined.auto.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
-
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.ValidationError
-import users.administration.RepositoryError.{AdministrationNotFound, OperationFailed}
 import users.administration.entities.Administration
 import users.administration.Repository
 import users.user.services.PasswordAlgorithm
+
+import users.administration.Repository.{AdministrationNotFound, OperationFailed}
 
 class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
