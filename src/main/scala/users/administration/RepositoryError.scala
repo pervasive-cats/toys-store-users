@@ -9,7 +9,7 @@ package users.administration
 
 import users.ValidationError
 
-object AdministrationRepositoryError {
+object RepositoryError {
 
   case object PSQLError extends ValidationError {
     override val message: String = "The Postgresql operation failed"

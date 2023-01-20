@@ -13,14 +13,26 @@ import eu.timepit.refined.string.MatchesRegex
 
 import users.{Validated, ValidationError}
 
+type EncryptedPasswordString = String Refined MatchesRegex["^\\$2a\\$12\\$[a-zA-Z0-9\\./]{53}$"]
+
 trait EncryptedPassword {
 
-  val value: String
+  val value: EncryptedPasswordString
+
 }
 
 object EncryptedPassword {
 
-  final private case class EncryptedPasswordImpl(value: String) extends EncryptedPassword
+  final private case class EncryptedPasswordImpl(value: EncryptedPasswordString) extends EncryptedPassword
 
-  def apply(value: String): EncryptedPassword = EncryptedPasswordImpl(value)
+  case object WrongEncryptedPasswordFormat extends ValidationError {
+
+    override val message: String = "The encrypted password format is invalid"
+  }
+
+  def apply(value: String): Validated[EncryptedPassword] = applyRef[EncryptedPasswordString](value) match {
+    case Left(_) => Left[ValidationError, EncryptedPassword](WrongEncryptedPasswordFormat)
+    case Right(value) => Right[ValidationError, EncryptedPassword](EncryptedPasswordImpl(value))
+  }
+
 }

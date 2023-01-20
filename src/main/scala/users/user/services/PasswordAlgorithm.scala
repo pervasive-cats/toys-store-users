@@ -17,7 +17,8 @@ trait PasswordAlgorithm {
 
   def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean
 
-  def encrypt(plainPassword: PlainPassword): EncryptedPassword
+  def encrypt(plainPassword: PlainPassword): Validated[EncryptedPassword]
+
 }
 
 object PasswordAlgorithm {
@@ -33,7 +34,7 @@ object PasswordAlgorithm {
     def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean =
       verifyAlgorithm.verify(actualPassword.value.toCharArray, expectedPassword.value).verified
 
-    def encrypt(plainPassword: PlainPassword): EncryptedPassword =
+    def encrypt(plainPassword: PlainPassword): Validated[EncryptedPassword] =
       EncryptedPassword(hashAlgorithm.hashToString(cost, plainPassword.value.toCharArray))
   }
 }

@@ -5,7 +5,6 @@
  */
 
 package io.github.pervasivecats
-
 package users
 
 type Validated[A] = Either[ValidationError, A]

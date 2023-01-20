@@ -7,8 +7,8 @@
 package io.github.pervasivecats
 
 import scala.annotation.targetName
+import scala.annotation.unused
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals", "scalafix:DisableSyntax.=="))
 object AnyOps {
 
   extension [A](self: A) {

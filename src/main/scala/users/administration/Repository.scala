@@ -25,7 +25,7 @@ import org.postgresql.util.PSQLException
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.user.Repository
-import users.administration.AdministrationRepositoryError.*
+import users.administration.RepositoryError.*
 import users.administration.entities.Administration
 import users.user.Repository as UserRepository
 import AnyOps.*
@@ -71,7 +71,7 @@ object Repository {
         )
         .map(EncryptedPassword(_))
         .headOption
-        .toRight[ValidationError](AdministrationNotFound)
+        .getOrElse(Left[ValidationError, EncryptedPassword](AdministrationNotFound))
     }
 
     override def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Validated[Unit] = {
