@@ -10,7 +10,7 @@ package users.storemanager.entities
 import users.storemanager.valueobjects.Store
 import users.user.entities.UserOps
 
-trait StoreManagerOps[A <: StoreManager: UserOps] {
+trait StoreManagerOps[A <: StoreManager] {
 
   def updateStore(storeManager: A, newStore: Store): A
 }
@@ -21,5 +21,4 @@ object StoreManagerOps {
 
     def updateStore(newStore: Store): A = implicitly[StoreManagerOps[A]].updateStore(storeManager, newStore)
   }
-
 }

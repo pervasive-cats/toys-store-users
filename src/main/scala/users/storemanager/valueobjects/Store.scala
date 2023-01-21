@@ -14,23 +14,23 @@ import eu.timepit.refined.numeric.NonNegative
 
 import users.{Validated, ValidationError}
 
-type StoreID = Long Refined NonNegative
+type IdNumber = Long Refined NonNegative
 
 trait Store {
 
-  val value: StoreID
+  val id: IdNumber
 }
 
 object Store {
 
-  final private case class StoreImpl(value: StoreID) extends Store
+  final private case class StoreImpl(id: IdNumber) extends Store
 
   case object WrongStoreFormat extends ValidationError {
 
     override val message: String = "The store id is a negative value"
   }
 
-  def apply(value: Long): Validated[Store] = applyRef[StoreID](value) match {
+  def apply(value: Long): Validated[Store] = applyRef[IdNumber](value) match {
     case Left(_) => Left[ValidationError, Store](WrongStoreFormat)
     case Right(value) => Right[ValidationError, Store](StoreImpl(value))
   }

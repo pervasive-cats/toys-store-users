@@ -5,6 +5,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / excludeLintKeys := Set(idePackagePrefix)
 
 Test / fork := true
+
 ThisBuild / scalaVersion := "3.2.2-RC2"
 
 ThisBuild / scalafixDependencies ++= Seq(

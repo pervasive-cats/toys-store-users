@@ -31,31 +31,16 @@ import users.storemanager.entities.StoreManager
 import users.ValidationError
 import users.user.services.PasswordAlgorithm
 
-class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
+class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
-  private val usernameString: String = "matteo"
-  private val storeID: Long = 10
-  private val newStoreID: Long = 99
-
-  private val username: Username = Username(usernameString).getOrElse(fail())
-  private val wrongUsername: Username = Username("nonmatteo").getOrElse(fail())
-  private val store: Store = Store(storeID).getOrElse(fail())
-  private val newStore: Store = Store(newStoreID).getOrElse(fail())
-
-  private val password: EncryptedPassword =
-    summon[PasswordAlgorithm].encrypt(PlainPassword("Password1!").getOrElse(fail())).getOrElse(fail())
-
-  val timeout: FiniteDuration = FiniteDuration(300, SECONDS)
-
-  val initScriptParam: CommonParams =
-    CommonParams(startupTimeout = timeout, connectTimeout = timeout, initScriptPath = Option("users.sql"))
+  private val timeout: FiniteDuration = FiniteDuration(300, SECONDS)
 
   override val containerDef: PostgreSQLContainer.Def = PostgreSQLContainer.Def(
     dockerImageName = DockerImageName.parse("postgres:15.1"),
     databaseName = "users",
     username = "test",
     password = "test",
-    commonJdbcParams = initScriptParam
+    commonJdbcParams = CommonParams(timeout, timeout, Some("users.sql"))
   )
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
@@ -64,28 +49,30 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
   override def afterContainersStart(containers: Containers): Unit =
     repository = Some(Repository.withPort(containers.container.getFirstMappedPort.intValue()))
 
-  describe("A PostgreSQL container") {
-    describe("when started") {
-      it("should stay connected") {
-        withContainers { pgContainer =>
-          Class.forName(pgContainer.driverClassName)
-          val connection = DriverManager.getConnection(pgContainer.jdbcUrl, pgContainer.username, pgContainer.password)
-          assert(!connection.isClosed)
-        }
-      }
-    }
-  }
+  private val usernameString: String = "matteo"
+  private val storeId: Long = 10
+  private val newStoreId: Long = 99
+
+  private val username: Username = Username(usernameString).getOrElse(fail())
+  private val wrongUsername: Username = Username("nonmatteo").getOrElse(fail())
+  private val store: Store = Store(storeId).getOrElse(fail())
+  private val newStore: Store = Store(newStoreId).getOrElse(fail())
+
+  private val password: EncryptedPassword =
+    summon[PasswordAlgorithm].encrypt(PlainPassword("Password1!").getOrElse(fail())).getOrElse(fail())
+
+  private val newPassword: EncryptedPassword =
+    summon[PasswordAlgorithm].encrypt(PlainPassword("NewPassword1!").getOrElse(fail())).getOrElse(fail())
 
   describe("The store manager repository") {
     describe("when asked to register a store manager") {
       it("should add the entry to the database") {
-        val result = repository
+        repository
           .getOrElse(fail())
           .register(
             StoreManager(username, store),
             password
-          )
-        result shouldBe Right[ValidationError, Unit](())
+          ) shouldBe Right[ValidationError, Unit](())
       }
     }
 
@@ -104,7 +91,7 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
       it("should return the requested store manager") {
         val result = repository.getOrElse(fail()).findByUsername(username)
         (result.getOrElse(fail()).username.value.value: String) shouldBe usernameString
-        (result.getOrElse(fail()).store.value.value: Long) shouldBe storeID
+        (result.getOrElse(fail()).store.id.value: Long) shouldBe storeId
       }
     }
 
@@ -123,7 +110,7 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
           Unit
         ](())
 
-        (repository.getOrElse(fail()).findByUsername(username).getOrElse(fail()).store.value.value: Long) shouldBe newStoreID
+        (repository.getOrElse(fail()).findByUsername(username).getOrElse(fail()).store.id.value: Long) shouldBe newStoreId
       }
     }
 
@@ -158,9 +145,6 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
     describe("when asked to update a store manager's password") {
       it("should correctly update the password") {
-        val newPassword: EncryptedPassword =
-          summon[PasswordAlgorithm].encrypt(PlainPassword("NewPassword1!").getOrElse(fail())).getOrElse(fail())
-
         repository.getOrElse(fail()).updatePassword(StoreManager(username, store), newPassword) shouldBe Right[
           ValidationError,
           Unit
@@ -172,9 +156,6 @@ class StoreManagerRepositoryTest extends AnyFunSpec with TestContainerForAll {
 
     describe("when asked to update a non-existent store manager's password") {
       it("should return OperationFailed") {
-        val newPassword: EncryptedPassword =
-          summon[PasswordAlgorithm].encrypt(PlainPassword("NewPassword1!").getOrElse(fail())).getOrElse(fail())
-
         repository.getOrElse(fail()).updatePassword(StoreManager(wrongUsername, store), newPassword) shouldBe Left[
           ValidationError,
           EncryptedPassword

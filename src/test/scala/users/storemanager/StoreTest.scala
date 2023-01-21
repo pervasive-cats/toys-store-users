@@ -26,17 +26,17 @@ class StoreTest extends AnyFunSpec {
 
     describe("when created with a positive value identifier") {
       it("should be valid") {
-        val storeID: Long = 9000
+        val storeId: Long = 9000
 
-        (Store(storeID).value.value: Long) shouldBe storeID
+        (Store(storeId).value.id: Long) shouldBe storeId
       }
     }
 
     describe("when created with an identifier of value 0") {
       it("should be valid") {
-        val storeID: Long = 0
+        val storeId: Long = 0
 
-        (Store(storeID).value.value: Long) shouldBe storeID
+        (Store(storeId).value.id: Long) shouldBe storeId
       }
     }
   }

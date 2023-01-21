@@ -30,7 +30,6 @@ import AnyOps.*
 
 trait Repository extends UserRepository[StoreManager] {
 
-    /** can yield UserNotFound validation error */
   def findByUsername(username: Username): Validated[StoreManager]
 
   def register(storeManager: StoreManager, password: EncryptedPassword): Validated[Unit]
@@ -91,7 +90,7 @@ object Repository {
         else if (
           ctx.run(
             query[StoreManagers].insertValue(
-              lift(StoreManagers(storeManager.username.value, password.value, storeManager.store.value))
+              lift(StoreManagers(storeManager.username.value, password.value, storeManager.store.id))
             )
           )
           !==
@@ -104,7 +103,7 @@ object Repository {
     }
 
     override def updateStore(storeManager: StoreManager, store: Store): Validated[Unit] = protectFromException {
-      if (ctx.run(queryByUsername(storeManager.username).update(_.store -> lift(store.value.value))) !== 1L)
+      if (ctx.run(queryByUsername(storeManager.username).update(_.store -> lift(store.id.value))) !== 1L)
         Left[ValidationError, Unit](OperationFailed)
       else
         Right[ValidationError, Unit](())
