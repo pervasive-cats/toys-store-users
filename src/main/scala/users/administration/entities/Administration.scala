@@ -22,5 +22,4 @@ object Administration {
   final private case class AdministrationImpl(username: Username) extends Administration
 
   def apply(username: Username): Administration = AdministrationImpl(username)
-
 }

@@ -67,11 +67,8 @@ object Repository {
     override def findByUsername(username: Username): Validated[Administration] = protectFromException {
       ctx
         .run(queryByUsername(username))
-        .map(c =>
-          for {
-            u <- Username(c.username)
-          } yield Administration(u)
-        )
+        .map(a => Username(a.username))
+        .map(_.map(u => Administration(u)))
         .headOption
         .getOrElse(Left[ValidationError, Administration](AdministrationNotFound))
     }
