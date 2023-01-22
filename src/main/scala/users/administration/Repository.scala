@@ -31,18 +31,23 @@ import AnyOps.*
 import users.user.services.PasswordAlgorithm
 
 trait Repository extends UserRepository[Administration] {
+
   def findByUsername(username: Username): Validated[Administration]
+
   def findPassword(administration: Administration): Validated[EncryptedPassword]
+
   def updatePassword(administration: Administration, encryptedPassword: EncryptedPassword): Validated[Unit]
 }
 
 object Repository {
 
   case object AdministrationNotFound extends ValidationError {
+
     override val message: String = "No user found for the username that was provided"
   }
 
   case object OperationFailed extends ValidationError {
+
     override val message: String = "The operation on the given customer was not correctly performed"
   }
 
@@ -56,7 +61,7 @@ object Repository {
       Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
 
     private def queryByUsername(username: Username) = quote {
-      querySchema[Administrators](entity = "administrators").filter(_.username === lift[String](username.value))
+      query[Administrators].filter(_.username === lift[String](username.value))
     }
 
     override def findByUsername(username: Username): Validated[Administration] = protectFromException {
@@ -95,7 +100,6 @@ object Repository {
       else
         Right[ValidationError, Unit](())
     }
-
   }
 
   def apply: Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, "ctx"))
@@ -107,5 +111,4 @@ object Repository {
         ConfigFactory.load().getConfig("ctx").withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(port))
       )
     )
-
 }
