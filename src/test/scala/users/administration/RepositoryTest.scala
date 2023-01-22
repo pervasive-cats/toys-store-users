@@ -88,7 +88,9 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       it("should return OperationFailed") {
         val db: Repository = repository.getOrElse(fail())
 
-        db.updatePassword(Administration(wrongUsername), encryptedNewPassword) shouldBe Left[ValidationError, Unit](OperationFailed)
+        db.updatePassword(Administration(wrongUsername), encryptedNewPassword) shouldBe Left[ValidationError, Unit](
+          OperationFailed
+        )
       }
     }
 
