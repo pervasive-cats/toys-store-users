@@ -22,7 +22,3 @@ ALTER TABLE ONLY public.administrators ADD CONSTRAINT administrators_pkey PRIMAR
 ALTER TABLE ONLY public.customers ADD CONSTRAINT customers_pkey PRIMARY KEY (email);
 
 ALTER TABLE ONLY public.store_managers ADD CONSTRAINT store_managers_pkey PRIMARY KEY (username);
-
-INSERT INTO public.administrators(
-  username, password)
-  VALUES ('elena', 'Efda!dWQ');
