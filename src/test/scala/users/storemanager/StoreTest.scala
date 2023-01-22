@@ -13,14 +13,14 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
 import users.storemanager.valueobjects.Store
-import users.storemanager.valueobjects.Store.WrongStoreFormat
+import users.storemanager.valueobjects.Store.WrongStoreIdFormat
 
 class StoreTest extends AnyFunSpec {
 
   describe("A store") {
     describe("when created with a negative value identifier") {
       it("should not be valid") {
-        Store(-9000).left.value shouldBe WrongStoreFormat
+        Store(-9000).left.value shouldBe WrongStoreIdFormat
       }
     }
 

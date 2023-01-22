@@ -178,5 +178,4 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       }
     }
   }
-
 }

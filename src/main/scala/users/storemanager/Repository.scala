@@ -37,7 +37,6 @@ trait Repository extends UserRepository[StoreManager] {
   def updateStore(storeManager: StoreManager, store: Store): Validated[Unit]
 
   def unregister(storeManager: StoreManager): Validated[Unit]
-
 }
 
 object Repository {
