@@ -280,12 +280,9 @@ hs_err_pid*
 
 # End of https://www.toptal.com/developers/gitignore/api/scala,intellij,sbt,node
 
-<<<<<<< HEAD
-
 # random semanticdb creation
 .semanticdb
-=======
+
 application.properties
 
 !/src/test/resources/application.properties
->>>>>>> beta
