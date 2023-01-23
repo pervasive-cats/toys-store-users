@@ -286,3 +286,5 @@ hs_err_pid*
 application.properties
 
 !/src/test/resources/application.properties
+
+*.semanticdb

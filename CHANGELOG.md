@@ -1,3 +1,28 @@
+# [1.0.0-beta.5](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2023-01-22)
+
+
+### Bug Fixes
+
+* add application.properties for testing ([2870a78](https://github.com/pervasive-cats/toys-store-users/commit/2870a789f368536f9369248e27467224598ab534))
+* scalafix formatting ([05c0912](https://github.com/pervasive-cats/toys-store-users/commit/05c09127917d54bde1c1f36a7517b33562f22c55))
+* scalafmt formatting ([7cca693](https://github.com/pervasive-cats/toys-store-users/commit/7cca693bd9df6eb1d842f257ce89566847bc5364))
+* store manager repository test ([101944f](https://github.com/pervasive-cats/toys-store-users/commit/101944f2c780f67fe5753dcffa8e64c3eec06a89))
+* update store manager ops with generics ([6634b97](https://github.com/pervasive-cats/toys-store-users/commit/6634b973c279d592ca2b75b5b5039b0703eb7930))
+
+
+### Features
+
+* add === ([f078e78](https://github.com/pervasive-cats/toys-store-users/commit/f078e78e42bdf40cd84868797b9799b609b41bfd))
+* add findByUsername to store manager repo ([8f2a143](https://github.com/pervasive-cats/toys-store-users/commit/8f2a143d87cd8f65b99b7c919dab8d61e24a4f6a))
+* add registration method to store manager repo ([25c1a5e](https://github.com/pervasive-cats/toys-store-users/commit/25c1a5eec40f815ae8714a5b744b5abcb40db3c3))
+* add store manager operations ([875e468](https://github.com/pervasive-cats/toys-store-users/commit/875e4682414321e25471a0c7b52aecd963b74d29))
+* add store manager repository trait ([769e69d](https://github.com/pervasive-cats/toys-store-users/commit/769e69ded963f8924e4e6b2b74611ff60f39f8b8))
+* add Store value object ([ad94dc7](https://github.com/pervasive-cats/toys-store-users/commit/ad94dc714d20d6aa6833380b0b5ab2314b3cec25))
+* add StoreManager entity ([7c63930](https://github.com/pervasive-cats/toys-store-users/commit/7c63930312b1eea1d9d0c8c9145843efc0f372a2))
+* add unregister method ([99c8b90](https://github.com/pervasive-cats/toys-store-users/commit/99c8b90e9401c6a830481323965ffa3783c03573))
+* add updatePassword and findPassword to store manager repository, refactor tests ([e9c3218](https://github.com/pervasive-cats/toys-store-users/commit/e9c3218cad2ff2ca8dfafa485242382af5d632a1))
+* add updateStore method ([71dda38](https://github.com/pervasive-cats/toys-store-users/commit/71dda3876e3a24417da3a1acf7dd7605782f1f52))
+
 # [1.0.0-beta.4](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2023-01-19)
 
 
