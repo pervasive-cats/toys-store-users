@@ -1,3 +1,27 @@
+# [1.0.0-beta.6](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2023-01-23)
+
+
+### Bug Fixes
+
+* Add scalafmt and scalafixAll ([337f19e](https://github.com/pervasive-cats/toys-store-users/commit/337f19ef8cf7b6f252f581919cb418792c366b8e))
+* Administration creation test ([f28efb4](https://github.com/pervasive-cats/toys-store-users/commit/f28efb42d6dbba1906abfe98ffeed66d550da128))
+* move used RepositoryError methods in to Repository ([e4a4253](https://github.com/pervasive-cats/toys-store-users/commit/e4a425376e8cccf3caa39c4bd0a9e7403de090b5))
+* removed .properties from gitignore ([6406ef1](https://github.com/pervasive-cats/toys-store-users/commit/6406ef11df378a5c9deec381e3739c7a64c7df19))
+* removed INSERT administration in user.sql in root level ([454f53f](https://github.com/pervasive-cats/toys-store-users/commit/454f53f0e45f12ea6114a6387247db964bb3ef7a))
+* resolve merge conflicts ([dc537c1](https://github.com/pervasive-cats/toys-store-users/commit/dc537c1e24e8c6eea0b36e75c28eee31271c288c))
+* resolve version conflict ([3158b16](https://github.com/pervasive-cats/toys-store-users/commit/3158b1694f4575fded908f2844d30065df94574f))
+* update Administration RepositoryTest methods ([6f21028](https://github.com/pervasive-cats/toys-store-users/commit/6f21028ea001abfbf31d4526493d5c7b125a0dfc))
+
+
+### Features
+
+* add Administration ([ea01879](https://github.com/pervasive-cats/toys-store-users/commit/ea0187912225491dd44856de834cb75d049f9ae3))
+* add Administration ([975c5e5](https://github.com/pervasive-cats/toys-store-users/commit/975c5e534220f9e71b6f4f37f9df9280cc51f9c4))
+* add administration repositor ([575a83f](https://github.com/pervasive-cats/toys-store-users/commit/575a83fde8658ccd6ecf190b597e3afda8898cd1))
+* add findByUsername test ([71c95cb](https://github.com/pervasive-cats/toys-store-users/commit/71c95cb57a700ceb0fed5242249c93172aa310ed))
+* add findPassword test ([90ac6f6](https://github.com/pervasive-cats/toys-store-users/commit/90ac6f6cb5c21c175186b640d2da914e303c0199))
+* add PostgreSQL container for testing ([dbd5248](https://github.com/pervasive-cats/toys-store-users/commit/dbd52482fedad4cc42147cd4149bb10ef772c9de))
+
 # [1.0.0-beta.5](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2023-01-22)
 
 
