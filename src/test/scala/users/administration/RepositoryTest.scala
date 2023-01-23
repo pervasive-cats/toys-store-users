@@ -49,9 +49,9 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
   private val rightUsername: Username = Username("elena").getOrElse(fail())
 
-  describe("An administration") {
-    describe("when asked to retrieve the administration corresponding to a username") {
-      it("should return the requested administration") {
+  describe("An administration repository") {
+    describe("when asked to retrieve the administration account corresponding to a username") {
+      it("should return the corresponding account") {
         repository.getOrElse(fail()).findByUsername(rightUsername).getOrElse(fail()).username shouldBe rightUsername
       }
     }
