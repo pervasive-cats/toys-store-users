@@ -23,11 +23,10 @@ class AdministrationTest extends AnyFunSpec {
 
   val username: Username = Username("Elena").getOrElse(fail())
 
-  describe("An administration") {
+  describe("An administration account") {
     describe("when created with a username") {
-      it("should contain them") {
-        val administration: Administration = Administration(username)
-        administration.username shouldBe username
+      it("should contain it") {
+        Administration(username).username shouldBe username
       }
     }
   }

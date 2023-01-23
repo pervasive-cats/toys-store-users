@@ -47,15 +47,12 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
   override def afterContainersStart(containers: Containers): Unit =
     repository = Some(Repository.withPort(containers.container.getFirstMappedPort.intValue()))
 
-  val rightUsername: Username = Username("elena").getOrElse(fail())
+  private val rightUsername: Username = Username("elena").getOrElse(fail())
 
   describe("An administration") {
-
     describe("when asked to retrieve the administration corresponding to a username") {
       it("should return the requested administration") {
-        val db: Repository = repository.getOrElse(fail())
-
-        db.findByUsername(rightUsername).getOrElse(fail()).username shouldBe rightUsername
+        repository.getOrElse(fail()).findByUsername(rightUsername).getOrElse(fail()).username shouldBe rightUsername
       }
     }
 
@@ -63,9 +60,9 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
     describe("when asked to retrieve a non-existent administration account") {
       it("should return UserNotFound") {
-        val db: Repository = repository.getOrElse(fail())
-
-        db.findByUsername(wrongUsername) shouldBe Left[ValidationError, Administration](AdministrationNotFound)
+        repository
+          .getOrElse(fail())
+          .findByUsername(wrongUsername) shouldBe Left[ValidationError, Administration](AdministrationNotFound)
       }
     }
 
@@ -74,40 +71,34 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
     describe("when asked to update the password of an administration account") {
       it("should update the specified password") {
-        val db: Repository = repository.getOrElse(fail())
-
-        db.updatePassword(Administration(rightUsername), encryptedNewPassword).getOrElse(fail())
-
-        val updatedPassword = db.findPassword(Administration(rightUsername)).getOrElse(fail())
-
+        repository.getOrElse(fail()).updatePassword(Administration(rightUsername), encryptedNewPassword).getOrElse(fail())
+        val updatedPassword = repository.getOrElse(fail()).findPassword(Administration(rightUsername)).getOrElse(fail())
         summon[PasswordAlgorithm].check(updatedPassword, newPlainPassword) shouldBe true
       }
     }
 
     describe("when asked to update the password of a non-existent administration account") {
       it("should return OperationFailed") {
-        val db: Repository = repository.getOrElse(fail())
-
-        db.updatePassword(Administration(wrongUsername), encryptedNewPassword) shouldBe Left[ValidationError, Unit](
-          OperationFailed
-        )
+        repository
+          .getOrElse(fail())
+          .updatePassword(Administration(wrongUsername), encryptedNewPassword) shouldBe Left[ValidationError, Unit](
+            OperationFailed
+          )
       }
     }
 
     describe("when asked to retrieve the password of an administration account") {
       it("should return the requested administration password") {
-        val db: Repository = repository.getOrElse(fail())
-
-        db.updatePassword(Administration(rightUsername), encryptedNewPassword)
-        db.findPassword(Administration(rightUsername)).getOrElse(fail()) shouldBe encryptedNewPassword
+        repository.getOrElse(fail()).updatePassword(Administration(rightUsername), encryptedNewPassword)
+        repository.getOrElse(fail()).findPassword(Administration(rightUsername)).getOrElse(fail()) shouldBe encryptedNewPassword
       }
     }
 
     describe("when asked to retrieve the password of a non-existent administration account") {
       it("should return UserNotFound") {
-        val db: Repository = repository.getOrElse(fail())
-
-        db.findPassword(Administration(wrongUsername)) shouldBe Left[ValidationError, Administration](AdministrationNotFound)
+        repository
+          .getOrElse(fail())
+          .findPassword(Administration(wrongUsername)) shouldBe Left[ValidationError, Administration](AdministrationNotFound)
       }
     }
   }
