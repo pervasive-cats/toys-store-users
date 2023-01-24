@@ -49,7 +49,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       Repository(
         ConfigFactory
           .load()
-          .getConfig("ctx")
+          .getConfig("repository")
           .withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(containers.container.getFirstMappedPort.intValue()))
       )
     )
@@ -70,7 +70,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
         db.register(customer, password).getOrElse(fail())
         db.findByEmail(email).value shouldBe customer
         db.findPassword(customer).value shouldBe password
-        db.unregister(customer).getOrElse(fail())
+        db.deregister(customer).getOrElse(fail())
       }
     }
 
@@ -78,7 +78,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       it("should not be present into the database") {
         val db: Repository = repository.getOrElse(fail())
         db.register(customer, password).getOrElse(fail())
-        db.unregister(customer).getOrElse(fail())
+        db.deregister(customer).getOrElse(fail())
         db.findByEmail(email).left.value shouldBe CustomerNotFound
         db.findPassword(customer).left.value shouldBe CustomerNotFound
       }
@@ -102,7 +102,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
           newCustomer.username
         ).getOrElse(fail())
         db.findByEmail(newCustomer.email).value shouldBe newCustomer
-        db.unregister(newCustomer).getOrElse(fail())
+        db.deregister(newCustomer).getOrElse(fail())
       }
     }
 
@@ -136,7 +136,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
         db.register(customer, password).getOrElse(fail())
         db.updatePassword(customer, newPassword).getOrElse(fail())
         db.findPassword(customer).value shouldBe newPassword
-        db.unregister(customer).getOrElse(fail())
+        db.deregister(customer).getOrElse(fail())
       }
     }
 
@@ -156,7 +156,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
         val db: Repository = repository.getOrElse(fail())
         db.findByEmail(email).left.value shouldBe CustomerNotFound
         db.findPassword(customer).left.value shouldBe CustomerNotFound
-        db.unregister(customer).left.value shouldBe OperationFailed
+        db.deregister(customer).left.value shouldBe OperationFailed
       }
     }
 

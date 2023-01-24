@@ -37,7 +37,7 @@ trait Repository extends UserRepository[Customer] {
     username: Username
   ): Validated[Unit]
 
-  def unregister(customer: Customer): Validated[Unit]
+  def deregister(customer: Customer): Validated[Unit]
 }
 
 object Repository {
@@ -159,7 +159,7 @@ object Repository {
         Right[ValidationError, Unit](())
     }
 
-    override def unregister(customer: Customer): Validated[Unit] = protectFromException {
+    override def deregister(customer: Customer): Validated[Unit] = protectFromException {
       if (ctx.run(query[Customers].filter(_.email === lift[String](customer.email.value)).delete) !== 1L)
         Left[ValidationError, Unit](OperationFailed)
       else
