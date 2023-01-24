@@ -41,7 +41,7 @@ lazy val root = project
       akkaStream,
       akkaHttp,
       akkaHttpSprayJson,
-      akkaCluster,
+      akkaTestKit,
       rabbitMQ
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),

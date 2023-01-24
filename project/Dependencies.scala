@@ -29,7 +29,7 @@ object Dependencies {
   lazy val akkaHttpSprayJson: ModuleID =
     ("com.typesafe.akka" %% "akka-http-spray-json" % "10.4.0").cross(CrossVersion.for3Use2_13)
 
-  lazy val akkaCluster: ModuleID = "com.typesafe.akka" %% "akka-cluster-typed" % "2.7.0"
+  lazy val akkaTestKit: ModuleID = "com.typesafe.akka" % "akka-actor-testkit-typed_3" % "2.7.0" % Test
 
   lazy val rabbitMQ: ModuleID = "com.rabbitmq" % "amqp-client" % "5.16.0"
 }
