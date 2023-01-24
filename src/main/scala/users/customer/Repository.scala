@@ -9,6 +9,7 @@ package users.customer
 
 import scala.util.Try
 
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigValueFactory
 import eu.timepit.refined.auto.given
@@ -166,16 +167,5 @@ object Repository {
     }
   }
 
-  def apply: Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, "ctx"))
-
-  def withPort(port: Int): Repository =
-    PostgresRepository(
-      PostgresJdbcContext[SnakeCase](
-        SnakeCase,
-        ConfigFactory
-          .load()
-          .getConfig("ctx")
-          .withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(port))
-      )
-    )
+  def apply(config: Config): Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, config))
 }

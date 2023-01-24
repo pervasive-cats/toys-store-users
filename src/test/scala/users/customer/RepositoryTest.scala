@@ -15,6 +15,8 @@ import scala.concurrent.duration.FiniteDuration
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigValueFactory
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
@@ -43,7 +45,14 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
   private var repository: Option[Repository] = None
 
   override def afterContainersStart(containers: Containers): Unit =
-    repository = Some(Repository.withPort(containers.container.getFirstMappedPort.intValue()))
+    repository = Some(
+      Repository(
+        ConfigFactory
+          .load()
+          .getConfig("ctx")
+          .withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(containers.container.getFirstMappedPort.intValue()))
+      )
+    )
 
   private val username: Username = Username("mar10").getOrElse(fail())
   private val email: Email = Email("mario@email.com").getOrElse(fail())
