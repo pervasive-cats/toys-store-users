@@ -28,9 +28,9 @@ object User {
       using
       PasswordAlgorithm,
       Repository[A]
-    ): Validated[Boolean] = for {
+    ): Validated[Unit] = for {
       p <- summon[Repository[A]].findPassword(user)
-      r = summon[PasswordAlgorithm].check(p, password)
+      r <- summon[PasswordAlgorithm].check(p, password)
     } yield r
   }
 }

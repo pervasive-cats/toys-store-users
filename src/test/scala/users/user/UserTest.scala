@@ -7,6 +7,8 @@
 package io.github.pervasivecats
 package users.user
 
+import io.github.pervasivecats.users.user.services.PasswordAlgorithm.PasswordNotMatching
+
 import org.mockito.Mockito.*
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
@@ -33,13 +35,13 @@ class UserTest extends AnyFunSpec {
   describe("A user") {
     describe("when given the correct password to verify") {
       it("should return true") {
-        mockUser.verifyPassword(password).value shouldBe true
+        mockUser.verifyPassword(password).value shouldBe ()
       }
     }
 
     describe("when given the wrong password to verify") {
       it("should return false") {
-        mockUser.verifyPassword(PlainPassword("Password2!").getOrElse(fail())).value shouldBe false
+        mockUser.verifyPassword(PlainPassword("Password2!").getOrElse(fail())).left.value shouldBe PasswordNotMatching
       }
     }
   }

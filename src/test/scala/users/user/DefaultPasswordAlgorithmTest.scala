@@ -7,6 +7,8 @@
 package io.github.pervasivecats
 package users.user
 
+import io.github.pervasivecats.users.user.services.PasswordAlgorithm.PasswordNotMatching
+
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
@@ -29,7 +31,7 @@ class DefaultPasswordAlgorithmTest extends AnyFunSpec {
 
     describe("when used for checking a password against the correct one") {
       it("should return true") {
-        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password).value, password) shouldBe true
+        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password).value, password).value shouldBe ()
       }
     }
 
@@ -37,7 +39,10 @@ class DefaultPasswordAlgorithmTest extends AnyFunSpec {
       it("should return false") {
         val wrongPassword: PlainPassword = PlainPassword("Password2!").getOrElse(fail())
 
-        defaultPasswordAlgorithm.check(defaultPasswordAlgorithm.encrypt(password).value, wrongPassword) shouldBe false
+        defaultPasswordAlgorithm
+          .check(defaultPasswordAlgorithm.encrypt(password).value, wrongPassword)
+          .left
+          .value shouldBe PasswordNotMatching
       }
     }
   }

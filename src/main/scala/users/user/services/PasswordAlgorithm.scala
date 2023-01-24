@@ -10,17 +10,22 @@ package users.user.services
 import at.favre.lib.crypto.bcrypt.*
 import eu.timepit.refined.auto.given
 
-import users.Validated
+import users.{Validated, ValidationError}
 import users.user.valueobjects.{EncryptedPassword, PlainPassword}
 
 trait PasswordAlgorithm {
 
-  def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean
+  def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Validated[Unit]
 
   def encrypt(plainPassword: PlainPassword): Validated[EncryptedPassword]
 }
 
 object PasswordAlgorithm {
+
+  case object PasswordNotMatching extends ValidationError {
+
+    override val message: String = "The expected password and the actual password did not match"
+  }
 
   given PasswordAlgorithm with {
 
@@ -30,8 +35,11 @@ object PasswordAlgorithm {
     private val hashAlgorithm: BCrypt.Hasher = BCrypt.`with`(longPasswordStrategy)
     private val verifyAlgorithm: BCrypt.Verifyer = BCrypt.verifyer(version, longPasswordStrategy)
 
-    def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Boolean =
-      verifyAlgorithm.verify(actualPassword.value.toCharArray, expectedPassword.value).verified
+    def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Validated[Unit] =
+      if (verifyAlgorithm.verify(actualPassword.value.toCharArray, expectedPassword.value).verified)
+        Right[ValidationError, Unit](())
+      else
+        Left[ValidationError, Unit](PasswordNotMatching)
 
     def encrypt(plainPassword: PlainPassword): Validated[EncryptedPassword] =
       EncryptedPassword(hashAlgorithm.hashToString(cost, plainPassword.value.toCharArray))
