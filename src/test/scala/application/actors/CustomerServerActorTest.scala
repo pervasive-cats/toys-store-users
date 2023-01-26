@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.application.actors
+package application.actors
 
 import application.actors.*
 import application.actors.CustomerServerCommand.*

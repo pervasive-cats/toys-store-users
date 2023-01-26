@@ -7,6 +7,19 @@
 package io.github.pervasivecats
 package application.actors
 
+import java.util.concurrent.ForkJoinPool
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.util.Failure
+import scala.util.Success
+
+import akka.actor.ActorSystem
+import akka.actor.typed.*
+import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.Http
+import com.typesafe.config.Config
+
 import application.actors.{CustomerServerCommand, MessageBrokerCommand, RootCommand}
 import application.actors.CustomerServerCommand.*
 import application.actors.MessageBrokerCommand.CustomerUnregistered
@@ -17,16 +30,6 @@ import users.ValidationError
 import users.customer.entities.Customer
 import users.customer.entities.CustomerOps.updated
 import users.user.services.PasswordAlgorithm
-
-import akka.actor.ActorSystem
-import akka.actor.typed.*
-import akka.actor.typed.scaladsl.Behaviors
-import akka.http.scaladsl.Http
-import com.typesafe.config.Config
-
-import java.util.concurrent.ForkJoinPool
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 object CustomerServerActor {
 
