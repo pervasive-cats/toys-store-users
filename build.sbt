@@ -42,7 +42,9 @@ lazy val root = project
       akkaHttp,
       akkaHttpSprayJson,
       akkaTestKit,
-      rabbitMQ
+      rabbitMQ,
+      akkaStreamTestkit,
+      akkaHttpTestkit
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
     version := "1.0.0-beta.4",
