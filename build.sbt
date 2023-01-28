@@ -4,6 +4,8 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / excludeLintKeys := Set(idePackagePrefix)
 
+Test / fork := true
+
 ThisBuild / scalaVersion := "3.2.2-RC2"
 
 ThisBuild / scalafixDependencies ++= Seq(
@@ -47,7 +49,7 @@ lazy val root = project
       akkaHttpTestkit
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
-    version := "1.0.0-beta.4",
+    version := "1.0.0-beta.6",
     coverageEnabled := true,
     coverageMinimumStmtTotal := 80,
     coverageMinimumBranchTotal := 80,
@@ -60,5 +62,5 @@ lazy val root = project
       )
     ),
     assembly / assemblyJarName := "main.jar",
-    assembly / mainClass := Some("io.github.pervasivecats.Main"),
+    assembly / mainClass := Some("io.github.pervasivecats.Main")
   )

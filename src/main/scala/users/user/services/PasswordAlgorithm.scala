@@ -18,6 +18,7 @@ trait PasswordAlgorithm {
   def check(expectedPassword: EncryptedPassword, actualPassword: PlainPassword): Validated[Unit]
 
   def encrypt(plainPassword: PlainPassword): Validated[EncryptedPassword]
+
 }
 
 object PasswordAlgorithm {

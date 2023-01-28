@@ -18,6 +18,7 @@ type EncryptedPasswordString = String Refined MatchesRegex["^\\$2a\\$12\\$[a-zA-
 trait EncryptedPassword {
 
   val value: EncryptedPasswordString
+
 }
 
 object EncryptedPassword {
@@ -33,4 +34,5 @@ object EncryptedPassword {
     case Left(_) => Left[ValidationError, EncryptedPassword](WrongEncryptedPasswordFormat)
     case Right(value) => Right[ValidationError, EncryptedPassword](EncryptedPasswordImpl(value))
   }
+
 }

@@ -282,4 +282,9 @@ hs_err_pid*
 
 application.conf
 
+# random semanticdb creation
+.semanticdb
+
 !/src/test/resources/application.conf
+
+*.semanticdb
