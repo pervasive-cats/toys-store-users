@@ -26,6 +26,7 @@ import spray.json.RootJsonFormat
 import spray.json.RootJsonReader
 import spray.json.RootJsonWriter
 import spray.json.deserializationError
+import spray.json.enrichAny
 import spray.json.jsonReader
 
 import application.Serializers.given
@@ -96,12 +97,12 @@ object Entity {
   given [A: JsonFormat]: RootJsonFormat[ResultResponseEntity[A]] with {
 
     override def read(json: JsValue): ResultResponseEntity[A] = json.asJsObject.getFields("result", "error") match {
-      case Seq(result, JsNull) => ResultResponseEntity(summon[JsonReader[A]].read(result))
+      case Seq(result, JsNull) => ResultResponseEntity(result.convertTo[A])
       case _ => deserializationError(msg = "Json format was not valid")
     }
 
     override def write(response: ResultResponseEntity[A]): JsValue = JsObject(
-      "result" -> summon[JsonWriter[A]].write(response.result),
+      "result" -> response.result.toJson,
       "error" -> JsNull
     )
   }
@@ -114,7 +115,6 @@ object Entity {
       case Seq(JsNull, error) =>
         error.asJsObject.getFields("type", "message") match {
           case Seq(JsString(tpe), JsString(message)) =>
-            println(tpe)
             ErrorResponseEntity(tpe match {
               case "CustomerAlreadyPresent" => CustomerAlreadyPresent
               case "WrongEncryptedPasswordFormat" => WrongEncryptedPasswordFormat
@@ -138,8 +138,8 @@ object Entity {
     override def write(response: ErrorResponseEntity): JsValue = JsObject(
       "result" -> JsNull,
       "error" -> JsObject(
-        "type" -> JsString(response.error.getClass.getSimpleName.replace("$", "")),
-        "message" -> JsString(response.error.message)
+        "type" -> response.error.getClass.getSimpleName.replace("$", "").toJson,
+        "message" -> response.error.message.toJson
       )
     )
   }

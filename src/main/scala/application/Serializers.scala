@@ -31,10 +31,10 @@ object Serializers extends DefaultJsonProtocol {
 
     override def read(json: JsValue): A = json match {
       case JsString(value) => builder(value).fold(e => deserializationError(e.message), identity)
-      case _ => deserializationError("Json format is not valid")
+      case _ => deserializationError(msg = "Json format is not valid")
     }
 
-    override def write(obj: A): JsValue = JsString(extractor(obj))
+    override def write(obj: A): JsValue = extractor(obj).toJson
   }
 
   given JsonFormat[PlainPassword] = stringSerializer[PlainPassword](_.value, PlainPassword.apply)
@@ -55,19 +55,28 @@ object Serializers extends DefaultJsonProtocol {
           f <- NameComponent(firstName)
           l <- NameComponent(lastName)
         } yield Customer(f, l, e, u)).fold(e => deserializationError(e.message), identity)
-      case _ => deserializationError("Json format is not valid")
+      case _ => deserializationError(msg = "Json format is not valid")
     }
 
     override def write(customer: Customer): JsValue = JsObject(
-      "username" -> JsString(customer.username.value),
-      "email" -> JsString(customer.email.value),
-      "first_name" -> JsString(customer.firstName.value),
-      "last_name" -> JsString(customer.lastName.value)
+      "username" -> customer.username.toJson,
+      "email" -> customer.email.toJson,
+      "first_name" -> customer.firstName.toJson,
+      "last_name" -> customer.lastName.toJson
     )
   }
 
-  given JsonWriter[CustomerUnregistered] with {
+  given JsonFormat[CustomerUnregistered] with {
 
-    override def write(event: CustomerUnregistered): JsValue = JsObject("email" -> event.email.toJson)
+    override def read(json: JsValue): CustomerUnregistered = json.asJsObject.getFields("type", "email") match {
+      case Seq(JsString("CustomerUnregistered"), JsString(email)) =>
+        Email(email).fold(e => deserializationError(e.message), CustomerUnregistered.apply)
+      case _ => deserializationError(msg = "Json format is not valid")
+    }
+
+    override def write(event: CustomerUnregistered): JsValue = JsObject(
+      "type" -> "CustomerUnregistered".toJson,
+      "email" -> event.email.toJson
+    )
   }
 }
