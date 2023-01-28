@@ -282,4 +282,4 @@ hs_err_pid*
 
 application.conf
 
-!/src/test/resources/application.properties
+!/src/test/resources/application.conf
