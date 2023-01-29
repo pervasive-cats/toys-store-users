@@ -52,7 +52,7 @@ jobs:
           name: codecov-umbrella
           verbose: true
       - name: Upload coverage to GitHub
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: coverage
           path: target/scala-3.2.1/scoverage-report/scoverage.xml
