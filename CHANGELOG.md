@@ -1,3 +1,21 @@
+# [1.0.0-beta.7](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2023-01-29)
+
+
+### Bug Fixes
+
+* fix deregister method name in Repository ([ae498bc](https://github.com/pervasive-cats/toys-store-users/commit/ae498bca68a20b1da6ee2c88d19dc05ff48ec779))
+* fix PasswordAlgorithm service so as its check method returns a Validated and not a Boolean ([46cfe11](https://github.com/pervasive-cats/toys-store-users/commit/46cfe117d09a76709501bc7e88854e84853e7a7d))
+* remove test configuration file from excluded files from git ([1f2bfdd](https://github.com/pervasive-cats/toys-store-users/commit/1f2bfddac92178b155f296f43ea4598eba3accad))
+* update customer Repository constructor for accepting directly a Config instance ([6d05741](https://github.com/pervasive-cats/toys-store-users/commit/6d0574159e99f5419ae1920ea3f44eae0f63361a))
+
+
+### Features
+
+* add actor for communicating with message broker ([f3faf19](https://github.com/pervasive-cats/toys-store-users/commit/f3faf19733b131b9197290436310740a8dd3af79))
+* add customer routes ([ef8d37a](https://github.com/pervasive-cats/toys-store-users/commit/ef8d37aafa4b9ce77e8d544b810cadf422a795f5))
+* add CustomerServerActor for handling customer requests ([e38f2b6](https://github.com/pervasive-cats/toys-store-users/commit/e38f2b6f90a944eda9b0185cec4792751fdf3601))
+* add root actor and main class ([eaefe30](https://github.com/pervasive-cats/toys-store-users/commit/eaefe30052389fde4c53de7829412f342671fd67))
+
 # [1.0.0-beta.6](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2023-01-23)
 
 
