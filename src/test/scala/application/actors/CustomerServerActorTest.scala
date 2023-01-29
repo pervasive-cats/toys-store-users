@@ -89,7 +89,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
 
   describe("A customer server actor") {
     describe("when first started up") {
-      it("should notify it to the root actor") {
+      it("should notify the root actor of its start") {
         rootActorProbe.expectMessage(10.seconds, Startup(true))
       }
     }
@@ -97,7 +97,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
 
   describe("A customer") {
     describe("after being registered") {
-      it("should be present into the database") {
+      it("should be present in the database") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
@@ -109,7 +109,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       }
     }
 
-    describe("after being registered and while trying to login with the wrong password") {
+    describe("after being registered and while trying to get logged in with the wrong password") {
       it("should not be allowed") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
@@ -123,7 +123,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
     }
 
     describe("after being registered and then deleted") {
-      it("should not be present into the database") {
+      it("should not be present in the database") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
@@ -135,7 +135,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       }
     }
 
-    describe("after being registered and while trying to being deleted with the wrong password") {
+    describe("after being registered and while trying to get deleted from the database with the wrong password") {
       it("should not be allowed") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
@@ -215,7 +215,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       }
     }
 
-    describe("after being registered and while trying to update their password with the wrong old password") {
+    describe("after being registered and while trying to get their password updated with the wrong old password") {
       it("should not be allowed") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
