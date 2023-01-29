@@ -4,7 +4,7 @@ object Dependencies {
 
   lazy val scalactic: ModuleID = "org.scalactic" %% "scalactic" % "3.2.15"
 
-  lazy val scalatest: ModuleID = "org.scalatest" %% "scalatest" % "3.2.14" % Test
+  lazy val scalatest: ModuleID = "org.scalatest" %% "scalatest" % "3.2.15" % Test
 
   lazy val mockito: ModuleID = "org.mockito" % "mockito-core" % "4.11.0" % Test
 
