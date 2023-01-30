@@ -65,7 +65,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
   describe("A customer") {
     describe("after being registered") {
-      it("should be present into the database") {
+      it("should be present in the database") {
         val db: Repository = repository.getOrElse(fail())
         db.register(customer, password).getOrElse(fail())
         db.findByEmail(email).value shouldBe customer
@@ -75,7 +75,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
 
     describe("after being registered and then deleted") {
-      it("should not be present into the database") {
+      it("should not be present in the database") {
         val db: Repository = repository.getOrElse(fail())
         db.register(customer, password).getOrElse(fail())
         db.deregister(customer).getOrElse(fail())
