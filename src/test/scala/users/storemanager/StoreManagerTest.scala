@@ -18,15 +18,15 @@ import users.user.valueobjects.Username
 
 class StoreManagerTest extends AnyFunSpec {
 
-  private val usernameString: String = "user1"
-  private val storeId: Long = 1
+  private val username: Username = Username("user1").getOrElse(fail())
+  private val store: Store = Store(1).getOrElse(fail())
+  private val manager: StoreManager = StoreManager(username, store)
 
   describe("A store manager") {
     describe("when created with a valid username and store") {
       it("should be created successfully") {
-        val manager: StoreManager = StoreManager(Username(usernameString).getOrElse(fail()), Store(storeId).getOrElse(fail()))
-        (manager.username.value: String) shouldBe usernameString
-        (manager.store.id: Long) shouldBe storeId
+        manager.username shouldBe username
+        manager.store shouldBe store
       }
     }
 
@@ -35,10 +35,39 @@ class StoreManagerTest extends AnyFunSpec {
     describe("when updated with a valid new store") {
       it("should correctly update") {
         val newStoreId: Long = 2L
-        val manager: StoreManager = StoreManager(Username(usernameString).getOrElse(fail()), Store(storeId).getOrElse(fail()))
         val updatedManager: StoreManager = manager.updateStore(Store(newStoreId).getOrElse(fail()))
         (updatedManager.store.id: Long) shouldBe newStoreId
-        (updatedManager.username.value: String) shouldBe usernameString
+        updatedManager.username shouldBe username
+      }
+    }
+
+    val secondStoreManager: StoreManager = StoreManager(username, store)
+    val thirdStoreManager: StoreManager = StoreManager(username, store)
+
+    describe("when compared with another identical customer") {
+      it("should be equal following the symmetrical property") {
+        manager shouldEqual secondStoreManager
+        secondStoreManager shouldEqual manager
+      }
+
+      it("should be equal following the transitive property") {
+        manager shouldEqual secondStoreManager
+        secondStoreManager shouldEqual thirdStoreManager
+        manager shouldEqual thirdStoreManager
+      }
+
+      it("should be equal following the reflexive property") {
+        manager shouldEqual manager
+      }
+
+      it("should have the same hash code as the other") {
+        manager.## shouldEqual secondStoreManager.##
+      }
+    }
+
+    describe("when compared with anything else") {
+      it("should not be equal") {
+        manager should not equal 1.0
       }
     }
   }

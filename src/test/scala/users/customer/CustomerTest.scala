@@ -11,7 +11,6 @@ import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
-
 import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.Username
@@ -64,6 +63,36 @@ class CustomerTest extends AnyFunSpec {
         val newLastName: NameComponent = NameComponent("Bianchi").getOrElse(fail())
 
         customer.updated(lastName = newLastName).lastName shouldBe newLastName
+      }
+    }
+
+    val secondCustomer: Customer = Customer(firstName, lastName, email, username)
+    val thirdCustomer: Customer = Customer(firstName, lastName, email, username)
+
+    describe("when compared with another identical customer") {
+      it("should be equal following the symmetrical property") {
+        customer shouldEqual secondCustomer
+        secondCustomer shouldEqual customer
+      }
+
+      it("should be equal following the transitive property") {
+        customer shouldEqual secondCustomer
+        secondCustomer shouldEqual thirdCustomer
+        customer shouldEqual thirdCustomer
+      }
+
+      it("should be equal following the reflexive property") {
+        customer shouldEqual customer
+      }
+
+      it("should have the same hash code as the other") {
+        customer.## shouldEqual secondCustomer.##
+      }
+    }
+
+    describe("when compared with anything else") {
+      it("should not be equal") {
+        customer should not equal 1.0
       }
     }
   }

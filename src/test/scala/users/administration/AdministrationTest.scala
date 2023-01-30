@@ -7,26 +7,52 @@
 package io.github.pervasivecats
 package users.administration
 
-import scala.language.postfixOps
+import users.administration.entities.Administration
+import users.user.valueobjects.*
 
-import io.github.pervasivecats.users.administration.entities.Administration
-
-import org.mockito.Mockito.description
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.when
+import org.mockito.Mockito.*
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers.shouldBe
-
-import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
+import org.scalatest.matchers.should.Matchers.*
 
 class AdministrationTest extends AnyFunSpec {
 
-  val username: Username = Username("Elena").getOrElse(fail())
+  private val username: Username = Username("Elena").getOrElse(fail())
+  private val administration: Administration = Administration(username)
 
   describe("An administration account") {
     describe("when created with a username") {
       it("should contain it") {
-        Administration(username).username shouldBe username
+        administration.username shouldBe username
+      }
+    }
+
+    val secondAdministration: Administration = Administration(username)
+    val thirdAdministration: Administration = Administration(username)
+
+    describe("when compared with another identical customer") {
+      it("should be equal following the symmetrical property") {
+        administration shouldEqual secondAdministration
+        secondAdministration shouldEqual administration
+      }
+
+      it("should be equal following the transitive property") {
+        administration shouldEqual secondAdministration
+        secondAdministration shouldEqual thirdAdministration
+        administration shouldEqual thirdAdministration
+      }
+
+      it("should be equal following the reflexive property") {
+        administration shouldEqual administration
+      }
+
+      it("should have the same hash code as the other") {
+        administration.## shouldEqual secondAdministration.##
+      }
+    }
+
+    describe("when compared with anything else") {
+      it("should not be equal") {
+        administration should not equal 1.0
       }
     }
   }
