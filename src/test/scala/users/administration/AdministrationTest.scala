@@ -7,12 +7,12 @@
 package io.github.pervasivecats
 package users.administration
 
-import users.administration.entities.Administration
-import users.user.valueobjects.*
-
 import org.mockito.Mockito.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
+
+import users.administration.entities.Administration
+import users.user.valueobjects.*
 
 class AdministrationTest extends AnyFunSpec {
 
