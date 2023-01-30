@@ -8,12 +8,16 @@ package io.github.pervasivecats
 package users.storemanager
 
 import java.sql.DriverManager
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.SECONDS
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigValueFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.auto.given
@@ -21,6 +25,7 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
+
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.storemanager.Repository
 import users.storemanager.Repository.{OperationFailed, StoreManagerAlreadyPresent, StoreManagerNotFound}
@@ -28,8 +33,6 @@ import users.storemanager.valueobjects.Store
 import users.storemanager.entities.StoreManager
 import users.ValidationError
 import users.user.services.PasswordAlgorithm
-
-import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 
 class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 

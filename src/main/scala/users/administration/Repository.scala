@@ -11,7 +11,10 @@ import scala.Console.println
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
+
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigValueFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.api.RefType.applyRef
@@ -19,6 +22,7 @@ import eu.timepit.refined.auto.autoUnwrap
 import eu.timepit.refined.auto.given
 import io.getquill.*
 import org.postgresql.util.PSQLException
+
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.user.Repository
