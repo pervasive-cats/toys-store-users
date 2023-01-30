@@ -68,7 +68,11 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
       it("should be present in the database") {
         val db: Repository = repository.getOrElse(fail())
         db.register(customer, password).getOrElse(fail())
-        db.findByEmail(email).value shouldBe customer
+        val databaseCustomer: Customer = db.findByEmail(email).getOrElse(fail())
+        databaseCustomer.email shouldBe customer.email
+        databaseCustomer.firstName shouldBe customer.firstName
+        databaseCustomer.lastName shouldBe customer.lastName
+        databaseCustomer.username shouldBe customer.username
         db.findPassword(customer).value shouldBe password
         db.deregister(customer).getOrElse(fail())
       }
@@ -101,7 +105,11 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
           newCustomer.email,
           newCustomer.username
         ).getOrElse(fail())
-        db.findByEmail(newCustomer.email).value shouldBe newCustomer
+        val newDatabaseCustomer: Customer = db.findByEmail(newCustomer.email).getOrElse(fail())
+        newDatabaseCustomer.email shouldBe newCustomer.email
+        newDatabaseCustomer.firstName shouldBe newCustomer.firstName
+        newDatabaseCustomer.lastName shouldBe newCustomer.lastName
+        newDatabaseCustomer.username shouldBe newCustomer.username
         db.deregister(newCustomer).getOrElse(fail())
       }
     }
@@ -121,8 +129,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
           newCustomer.lastName,
           newCustomer.email,
           newCustomer.username
-        ).left
-          .value shouldBe OperationFailed
+        ).left.value shouldBe OperationFailed
       }
     }
 

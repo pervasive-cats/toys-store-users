@@ -24,10 +24,7 @@ class StoreManagerTest extends AnyFunSpec {
   describe("A store manager") {
     describe("when created with a valid username and store") {
       it("should be created successfully") {
-        val username: Username = Username(usernameString).value
-        val store: Store = Store(storeId).value
-
-        val manager: StoreManager = StoreManager(username, store)
+        val manager: StoreManager = StoreManager(Username(usernameString).getOrElse(fail()), Store(storeId).getOrElse(fail()))
         (manager.username.value: String) shouldBe usernameString
         (manager.store.id: Long) shouldBe storeId
       }
@@ -37,13 +34,9 @@ class StoreManagerTest extends AnyFunSpec {
 
     describe("when updated with a valid new store") {
       it("should correctly update") {
-        val username: Username = Username(usernameString).value
-        val store: Store = Store(storeId).value
-        val newStoreId: Long = 2
-        val newStore: Store = Store(newStoreId).value
-        val manager: StoreManager = StoreManager(username, store)
-
-        val updatedManager: StoreManager = manager.updateStore(newStore)
+        val newStoreId: Long = 2L
+        val manager: StoreManager = StoreManager(Username(usernameString).getOrElse(fail()), Store(storeId).getOrElse(fail()))
+        val updatedManager: StoreManager = manager.updateStore(Store(newStoreId).getOrElse(fail()))
         (updatedManager.store.id: Long) shouldBe newStoreId
         (updatedManager.username.value: String) shouldBe usernameString
       }

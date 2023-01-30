@@ -11,9 +11,7 @@ import scala.Console.println
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
-import com.typesafe.config.ConfigFactory
-import com.typesafe.config.ConfigValueFactory
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.api.RefType.applyRef
@@ -21,7 +19,6 @@ import eu.timepit.refined.auto.autoUnwrap
 import eu.timepit.refined.auto.given
 import io.getquill.*
 import org.postgresql.util.PSQLException
-
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.{Validated, ValidationError}
 import users.user.Repository
@@ -99,13 +96,5 @@ object Repository {
     }
   }
 
-  def apply: Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, "ctx"))
-
-  def withPort(port: Int): Repository =
-    PostgresRepository(
-      PostgresJdbcContext[SnakeCase](
-        SnakeCase,
-        ConfigFactory.load().getConfig("repository").withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(port))
-      )
-    )
+  def apply(config: Config): Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, config))
 }

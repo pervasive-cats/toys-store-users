@@ -9,7 +9,6 @@ package users.administration
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
-
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
@@ -20,13 +19,14 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
-
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.ValidationError
 import users.administration.entities.Administration
 import users.administration.Repository
 import users.user.services.PasswordAlgorithm
 import users.administration.Repository.{AdministrationNotFound, OperationFailed}
+
+import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 
 class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
@@ -44,7 +44,14 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
   private var repository: Option[Repository] = None
 
   override def afterContainersStart(containers: Containers): Unit =
-    repository = Some(Repository.withPort(containers.container.getFirstMappedPort.intValue()))
+    repository = Some(
+      Repository(
+        ConfigFactory
+          .load()
+          .getConfig("repository")
+          .withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(containers.container.getFirstMappedPort.intValue()))
+      )
+    )
 
   private val rightUsername: Username = Username("elena").getOrElse(fail())
 
@@ -88,7 +95,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
     describe("when asked to retrieve the password of an administration account") {
       it("should return the requested administration password") {
-        repository.getOrElse(fail()).updatePassword(Administration(rightUsername), encryptedNewPassword)
+        repository.getOrElse(fail()).updatePassword(Administration(rightUsername), encryptedNewPassword).getOrElse(fail())
         repository.getOrElse(fail()).findPassword(Administration(rightUsername)).getOrElse(fail()) shouldBe encryptedNewPassword
       }
     }

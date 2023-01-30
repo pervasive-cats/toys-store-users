@@ -7,13 +7,13 @@
 package io.github.pervasivecats
 package users.customer.entities
 
-import io.github.pervasivecats.users.Validated
-
+import users.Validated
 import users.customer.Repository as CustomerRepository
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.Repository as UserRepository
 import users.user.entities.User
 import users.user.valueobjects.{EncryptedPassword, Username}
+import AnyOps.===
 
 trait Customer extends User {
 
@@ -27,7 +27,15 @@ trait Customer extends User {
 object Customer {
 
   private case class CustomerImpl(firstName: NameComponent, lastName: NameComponent, email: Email, username: Username)
-    extends Customer
+    extends Customer {
+
+    override def equals(obj: Any): Boolean = obj match {
+      case c: Customer => email === c.email
+      case _ => false
+    }
+
+    override def hashCode(): Int = email.##
+  }
 
   given CustomerOps[Customer] with {
 
