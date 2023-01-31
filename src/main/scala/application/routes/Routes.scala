@@ -17,7 +17,7 @@ import akka.http.scaladsl.server.*
 import spray.json.DefaultJsonProtocol
 import spray.json.DeserializationException
 
-import application.actors.{CustomerServerCommand, StoreManagerServerCommand}
+import application.actors.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 import application.routes.CustomerRoutes.complete
 import application.routes.Entity.ErrorResponseEntity
 import application.routes.Entity.given
@@ -42,11 +42,12 @@ object Routes extends Directives with SprayJsonSupport with DefaultJsonProtocol 
 
   def apply(
     customerServer: ActorRef[CustomerServerCommand],
-    storeManagerServer: ActorRef[StoreManagerServerCommand]
+    storeManagerServer: ActorRef[StoreManagerServerCommand],
+    administrationServer: ActorRef[AdministrationServerCommand]
   )(
     using
     ActorSystem[_]
   ): Route = handleRejections(rejectionHandler) {
-    concat(CustomerRoutes(customerServer), StoreManagerRoutes(storeManagerServer))
+    concat(CustomerRoutes(customerServer), StoreManagerRoutes(storeManagerServer), AdministrationRoutes(administrationServer))
   }
 }

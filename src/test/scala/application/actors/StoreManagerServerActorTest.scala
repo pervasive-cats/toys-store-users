@@ -9,7 +9,9 @@ package application.actors
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
+
 import io.github.pervasivecats.ValidationError
+
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRef
@@ -22,18 +24,17 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
+
 import application.actors.*
 import application.actors.StoreManagerServerCommand.*
 import application.actors.RootCommand.Startup
 import application.routes.Response
 import application.routes.Response.{EmptyResponse, StoreManagerResponse}
-import users.customer.Repository
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.*
 import users.storemanager.Repository.*
 import users.storemanager.entities.StoreManagerOps.updateStore
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
-
 import users.storemanager.entities.StoreManager
 import users.storemanager.valueobjects.Store
 

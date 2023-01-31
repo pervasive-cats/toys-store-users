@@ -10,6 +10,7 @@ package application.routes
 import scala.reflect.ClassTag
 
 import io.github.pervasivecats.ValidationError
+import io.github.pervasivecats.users.administration.Repository.AdministrationNotFound
 
 import spray.json.DefaultJsonProtocol.jsonFormat2
 import spray.json.DefaultJsonProtocol.jsonFormat3
@@ -78,6 +79,7 @@ object Entity {
               case "RepositoryOperationFailed" => RepositoryOperationFailed
               case "CustomerNotFound" => CustomerNotFound
               case "StoreManagerNotFound" => StoreManagerNotFound
+              case "AdministrationNotFound" => AdministrationNotFound
               case "RequestProcessingFailed" => RequestProcessingFailed
               case "WrongEmailFormat" => WrongEmailFormat
               case "PasswordNotMatching" => PasswordNotMatching

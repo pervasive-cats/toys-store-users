@@ -11,7 +11,7 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 
 import io.github.pervasivecats.ValidationError
-import io.github.pervasivecats.users.RepositoryOperationFailed
+import users.RepositoryOperationFailed
 
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
@@ -58,11 +58,15 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     )
 
   private val rightUsername: Username = Username("elena").getOrElse(fail())
+  private val rightPassword: PlainPassword = PlainPassword("Password1!").getOrElse(fail())
 
   describe("An administration repository") {
     describe("when asked to retrieve the administration account corresponding to a username") {
       it("should return the corresponding account") {
-        repository.getOrElse(fail()).findByUsername(rightUsername).getOrElse(fail()).username shouldBe rightUsername
+        val db: Repository = repository.getOrElse(fail())
+        db.findByUsername(rightUsername).getOrElse(fail()).username shouldBe rightUsername
+        val administration: Administration = Administration(rightUsername)
+        summon[PasswordAlgorithm].check(db.findPassword(administration).getOrElse(fail()), rightPassword).value shouldBe ()
       }
     }
 

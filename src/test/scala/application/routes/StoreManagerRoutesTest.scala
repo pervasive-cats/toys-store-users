@@ -26,7 +26,7 @@ import spray.json.RootJsonReader
 import spray.json.RootJsonWriter
 import spray.json.given
 
-import application.actors.{CustomerServerCommand, StoreManagerServerCommand}
+import application.actors.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 import application.actors.StoreManagerServerCommand.*
 import application.routes.Response.{EmptyResponse, StoreManagerResponse}
 import application.routes.Routes
@@ -46,7 +46,9 @@ class StoreManagerRoutesTest extends AnyFunSpec with ScalatestRouteTest with Spr
 
   private given typedSystem: ActorSystem[_] = system.toTyped
   private val storeManagerServerProbe = TestProbe[StoreManagerServerCommand]()
-  private val routes: Route = Routes(TestProbe[CustomerServerCommand]().ref, storeManagerServerProbe.ref)
+
+  private val routes: Route =
+    Routes(TestProbe[CustomerServerCommand]().ref, storeManagerServerProbe.ref, TestProbe[AdministrationServerCommand]().ref)
 
   private val username: Username = Username("mar10").getOrElse(fail())
   private val store: Store = Store(1).getOrElse(fail())

@@ -11,6 +11,7 @@ import scala.collection.immutable.AbstractSeq
 import scala.collection.immutable.LinearSeq
 
 import io.github.pervasivecats.Validated
+import io.github.pervasivecats.users.administration.entities.Administration
 
 import akka.util.Collections
 import eu.timepit.refined.auto.given
@@ -98,6 +99,19 @@ object Serializers extends DefaultJsonProtocol {
     override def write(storeManager: StoreManager): JsValue = JsObject(
       "username" -> storeManager.username.toJson,
       "store" -> storeManager.store.toJson
+    )
+  }
+
+  given JsonFormat[Administration] with {
+
+    override def read(json: JsValue): Administration = json.asJsObject.getFields("username") match {
+      case Seq(JsString(username)) =>
+        Username(username).map(Administration.apply).getOrElse(deserializationError(msg = "Json format is not valid"))
+      case _ => deserializationError(msg = "Json format is not valid")
+    }
+
+    override def write(administration: Administration): JsValue = JsObject(
+      "username" -> administration.username.toJson
     )
   }
 
