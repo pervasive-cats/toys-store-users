@@ -7,8 +7,15 @@
 package io.github.pervasivecats
 package application
 
+import scala.collection.immutable.AbstractSeq
+import scala.collection.immutable.LinearSeq
+
+import io.github.pervasivecats.Validated
+
+import akka.util.Collections
 import eu.timepit.refined.auto.given
 import spray.json.DefaultJsonProtocol
+import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
@@ -21,9 +28,10 @@ import spray.json.jsonReader
 
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.{PlainPassword, Username}
-import users.Validated
 import users.customer.entities.Customer
 import users.customer.events.CustomerUnregistered
+import users.storemanager.entities.StoreManager
+import users.storemanager.valueobjects.Store
 
 object Serializers extends DefaultJsonProtocol {
 
@@ -45,6 +53,16 @@ object Serializers extends DefaultJsonProtocol {
 
   given JsonFormat[NameComponent] = stringSerializer[NameComponent](_.value, NameComponent.apply)
 
+  given JsonFormat[Store] with {
+
+    override def read(json: JsValue): Store = json match {
+      case JsNumber(value) if value.isValidLong => Store(value.toLong).fold(e => deserializationError(e.message), identity)
+      case _ => deserializationError(msg = "Json format is not valid")
+    }
+
+    override def write(store: Store): JsValue = (store.id: Long).toJson
+  }
+
   given JsonFormat[Customer] with {
 
     override def read(json: JsValue): Customer = json.asJsObject.getFields("username", "email", "first_name", "last_name") match {
@@ -63,6 +81,23 @@ object Serializers extends DefaultJsonProtocol {
       "email" -> customer.email.toJson,
       "first_name" -> customer.firstName.toJson,
       "last_name" -> customer.lastName.toJson
+    )
+  }
+
+  given JsonFormat[StoreManager] with {
+
+    override def read(json: JsValue): StoreManager = json.asJsObject.getFields("username", "store") match {
+      case Seq(JsString(username), JsNumber(store)) if store.isValidLong =>
+        (for {
+          u <- Username(username)
+          s <- Store(store.longValue)
+        } yield StoreManager(u, s)).fold(e => deserializationError(e.message), identity)
+      case _ => deserializationError(msg = "Json format is not valid")
+    }
+
+    override def write(storeManager: StoreManager): JsValue = JsObject(
+      "username" -> storeManager.username.toJson,
+      "store" -> storeManager.store.toJson
     )
   }
 

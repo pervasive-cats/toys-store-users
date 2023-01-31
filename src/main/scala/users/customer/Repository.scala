@@ -9,13 +9,16 @@ package users.customer
 
 import scala.util.Try
 
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.ValidationError
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigValueFactory
 import eu.timepit.refined.auto.given
 import io.getquill.*
 
-import users.{Validated, ValidationError}
+import users.RepositoryOperationFailed
 import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.Repository as UserRepository
@@ -52,11 +55,6 @@ object Repository {
     override val message: String = "The customer was already registered"
   }
 
-  case object OperationFailed extends ValidationError {
-
-    override val message: String = "The operation on the given customer was not correctly performed"
-  }
-
   private class PostgresRepository(ctx: PostgresJdbcContext[SnakeCase]) extends Repository {
 
     import ctx.*
@@ -66,7 +64,7 @@ object Repository {
     private case class Customers(email: String, username: String, password: String, firstName: String, lastName: String)
 
     private def protectFromException[A](f: => Validated[A]): Validated[A] =
-      Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
+      Try(f).getOrElse(Left[ValidationError, A](RepositoryOperationFailed))
 
     private def queryByEmail(email: Email) = quote {
       querySchema[CustomersWithoutPassword](entity = "customers").filter(_.email === lift[String](email.value))
@@ -119,7 +117,7 @@ object Repository {
           !==
           1L
         )
-          Left[ValidationError, Unit](OperationFailed)
+          Left[ValidationError, Unit](RepositoryOperationFailed)
         else
           Right[ValidationError, Unit](())
       }
@@ -141,7 +139,7 @@ object Repository {
         !==
         1L
       )
-        Left[ValidationError, Unit](OperationFailed)
+        Left[ValidationError, Unit](RepositoryOperationFailed)
       else
         Right[ValidationError, Unit](())
     }
@@ -154,14 +152,14 @@ object Repository {
         !==
         1L
       )
-        Left[ValidationError, Unit](OperationFailed)
+        Left[ValidationError, Unit](RepositoryOperationFailed)
       else
         Right[ValidationError, Unit](())
     }
 
     override def deregister(customer: Customer): Validated[Unit] = protectFromException {
       if (ctx.run(query[Customers].filter(_.email === lift[String](customer.email.value)).delete) !== 1L)
-        Left[ValidationError, Unit](OperationFailed)
+        Left[ValidationError, Unit](RepositoryOperationFailed)
       else
         Right[ValidationError, Unit](())
     }

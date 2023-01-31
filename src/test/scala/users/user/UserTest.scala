@@ -7,6 +7,7 @@
 package io.github.pervasivecats
 package users.user
 
+import io.github.pervasivecats.ValidationError
 import io.github.pervasivecats.users.user.services.PasswordAlgorithm.PasswordNotMatching
 
 import org.mockito.Mockito.*
@@ -14,7 +15,6 @@ import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.ValidationError
 import users.user.entities.User
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.{EncryptedPassword, PlainPassword}

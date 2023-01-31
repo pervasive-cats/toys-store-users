@@ -10,6 +10,9 @@ package users.administration
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 
+import io.github.pervasivecats.ValidationError
+import io.github.pervasivecats.users.RepositoryOperationFailed
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
@@ -24,11 +27,10 @@ import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
-import users.ValidationError
 import users.administration.entities.Administration
 import users.administration.Repository
 import users.user.services.PasswordAlgorithm
-import users.administration.Repository.{AdministrationNotFound, OperationFailed}
+import users.administration.Repository.AdministrationNotFound
 
 class RepositoryTest extends AnyFunSpec with TestContainerForAll {
 
@@ -86,11 +88,11 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
 
     describe("when asked to update the password of a non-existent administration account") {
-      it("should return OperationFailed") {
+      it("should return RepositoryOperationFailed") {
         repository
           .getOrElse(fail())
           .updatePassword(Administration(wrongUsername), encryptedNewPassword) shouldBe Left[ValidationError, Unit](
-            OperationFailed
+            RepositoryOperationFailed
           )
       }
     }

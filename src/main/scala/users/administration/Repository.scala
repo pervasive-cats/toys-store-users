@@ -12,6 +12,9 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.ValidationError
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigValueFactory
@@ -24,7 +27,7 @@ import io.getquill.*
 import org.postgresql.util.PSQLException
 
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
-import users.{Validated, ValidationError}
+import users.RepositoryOperationFailed
 import users.user.Repository
 import users.administration.entities.Administration
 import users.user.Repository as UserRepository
@@ -47,11 +50,6 @@ object Repository {
     override val message: String = "No user found for the username that was provided"
   }
 
-  case object OperationFailed extends ValidationError {
-
-    override val message: String = "The operation on the given customer was not correctly performed"
-  }
-
   final private class PostgresRepository(ctx: PostgresJdbcContext[SnakeCase]) extends Repository {
 
     import ctx.*
@@ -59,7 +57,7 @@ object Repository {
     private case class Administrators(username: String, password: String)
 
     private def protectFromException[A](f: => Validated[A]): Validated[A] =
-      Try(f).getOrElse(Left[ValidationError, A](OperationFailed))
+      Try(f).getOrElse(Left[ValidationError, A](RepositoryOperationFailed))
 
     private def queryByUsername(username: Username) = quote {
       query[Administrators].filter(_.username === lift[String](username.value))
@@ -94,7 +92,7 @@ object Repository {
         !==
         1L
       )
-        Left[ValidationError, Unit](OperationFailed)
+        Left[ValidationError, Unit](RepositoryOperationFailed)
       else
         Right[ValidationError, Unit](())
     }

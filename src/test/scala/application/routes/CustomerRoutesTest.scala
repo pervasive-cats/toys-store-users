@@ -9,8 +9,8 @@ package users.application.routes
 
 import scala.concurrent.duration.DurationInt
 
-import io.github.pervasivecats.users.customer.entities.CustomerOps.updated
-import io.github.pervasivecats.users.user.services.PasswordAlgorithm.PasswordNotMatching
+import io.github.pervasivecats.ValidationError
+import io.github.pervasivecats.users.RepositoryOperationFailed
 
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorSystem
@@ -27,31 +27,26 @@ import spray.json.RootJsonReader
 import spray.json.RootJsonWriter
 import spray.json.given
 
-import application.actors
-import application.actors.CustomerServerCommand
-import application.actors.CustomerServerCommand.{
-  DeregisterCustomer,
-  LoginCustomer,
-  RegisterCustomer,
-  UpdateCustomerData,
-  UpdateCustomerPassword
-}
-import application.routes.Entity.*
+import application.actors.{CustomerServerCommand, StoreManagerServerCommand}
+import application.actors.CustomerServerCommand.*
 import application.routes.Response.{CustomerResponse, EmptyResponse}
 import application.routes.Routes
 import application.Serializers.given
+import application.routes.CustomerEntity.*
+import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
 import application.routes.Routes.{DeserializationFailed, RequestFailed}
 import users.customer.entities.Customer
+import users.customer.entities.CustomerOps.updated
 import users.customer.valueobjects.{Email, NameComponent}
+import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
-import users.ValidationError
-import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound, OperationFailed}
+import users.customer.Repository.*
 
 class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJsonSupport {
 
   private given typedSystem: ActorSystem[_] = system.toTyped
   private val customerServerProbe = TestProbe[CustomerServerCommand]()
-  private val routes: Route = Routes(customerServerProbe.ref)
+  private val routes: Route = Routes(customerServerProbe.ref, TestProbe[StoreManagerServerCommand]().ref)
 
   private val username: Username = Username("mar10").getOrElse(fail())
   private val email: Email = Email("mario@email.com").getOrElse(fail())
@@ -96,11 +91,11 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         val test: RouteTestResult =
           Post("/customer", CustomerRegistrationEntity(email, username, firstName, lastName, password)) ~> routes
         val message: RegisterCustomer = customerServerProbe.expectMessageType[RegisterCustomer](10.seconds)
-        message.replyTo ! CustomerResponse(Left[ValidationError, Customer](OperationFailed))
+        message.replyTo ! CustomerResponse(Left[ValidationError, Customer](RepositoryOperationFailed))
         test ~> check {
           status shouldBe StatusCodes.InternalServerError
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ErrorResponseEntity].error shouldBe OperationFailed
+          entityAs[ErrorResponseEntity].error shouldBe RepositoryOperationFailed
         }
       }
 
@@ -160,11 +155,11 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         val test: RouteTestResult =
           Delete("/customer", CustomerDeregistrationEntity(email, password)) ~> routes
         val message: DeregisterCustomer = customerServerProbe.expectMessageType[DeregisterCustomer](10.seconds)
-        message.replyTo ! EmptyResponse(Left[ValidationError, Unit](OperationFailed))
+        message.replyTo ! EmptyResponse(Left[ValidationError, Unit](RepositoryOperationFailed))
         test ~> check {
           status shouldBe StatusCodes.InternalServerError
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ErrorResponseEntity].error shouldBe OperationFailed
+          entityAs[ErrorResponseEntity].error shouldBe RepositoryOperationFailed
         }
       }
 
@@ -221,11 +216,11 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         val test: RouteTestResult =
           Put("/customer", CustomerUpdateDataEntity(email, newEmail, newUsername, newFirstName, newLastName)) ~> routes
         val message: UpdateCustomerData = customerServerProbe.expectMessageType[UpdateCustomerData](10.seconds)
-        message.replyTo ! CustomerResponse(Left[ValidationError, Customer](OperationFailed))
+        message.replyTo ! CustomerResponse(Left[ValidationError, Customer](RepositoryOperationFailed))
         test ~> check {
           status shouldBe StatusCodes.InternalServerError
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ErrorResponseEntity].error shouldBe OperationFailed
+          entityAs[ErrorResponseEntity].error shouldBe RepositoryOperationFailed
         }
       }
 
@@ -285,11 +280,11 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         val test: RouteTestResult =
           Put("/customer/login", CustomerLoginEntity(email, password)) ~> routes
         val message: LoginCustomer = customerServerProbe.expectMessageType[LoginCustomer](10.seconds)
-        message.replyTo ! CustomerResponse(Left[ValidationError, Customer](OperationFailed))
+        message.replyTo ! CustomerResponse(Left[ValidationError, Customer](RepositoryOperationFailed))
         test ~> check {
           status shouldBe StatusCodes.InternalServerError
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ErrorResponseEntity].error shouldBe OperationFailed
+          entityAs[ErrorResponseEntity].error shouldBe RepositoryOperationFailed
         }
       }
 
@@ -352,11 +347,11 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         val test: RouteTestResult =
           Put("/customer/password", CustomerUpdatePasswordEntity(email, password, newPassword)) ~> routes
         val message: UpdateCustomerPassword = customerServerProbe.expectMessageType[UpdateCustomerPassword](10.seconds)
-        message.replyTo ! EmptyResponse(Left[ValidationError, Unit](OperationFailed))
+        message.replyTo ! EmptyResponse(Left[ValidationError, Unit](RepositoryOperationFailed))
         test ~> check {
           status shouldBe StatusCodes.InternalServerError
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ErrorResponseEntity].error shouldBe OperationFailed
+          entityAs[ErrorResponseEntity].error shouldBe RepositoryOperationFailed
         }
       }
 

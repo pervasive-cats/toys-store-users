@@ -13,6 +13,9 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.SECONDS
 
+import io.github.pervasivecats.ValidationError
+import io.github.pervasivecats.users.RepositoryOperationFailed
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
@@ -28,10 +31,9 @@ import org.testcontainers.utility.DockerImageName
 
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.storemanager.Repository
-import users.storemanager.Repository.{OperationFailed, StoreManagerAlreadyPresent, StoreManagerNotFound}
+import users.storemanager.Repository.{StoreManagerAlreadyPresent, StoreManagerNotFound}
 import users.storemanager.valueobjects.Store
 import users.storemanager.entities.StoreManager
-import users.ValidationError
 import users.user.services.PasswordAlgorithm
 
 class RepositoryTest extends AnyFunSpec with TestContainerForAll {
@@ -125,12 +127,12 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
 
     describe("when asked to update a non-existent store manager's store") {
-      it("should return OperationFailed") {
+      it("should return RepositoryOperationFailed") {
         repository.getOrElse(fail()).updateStore(StoreManager(wrongUsername, store), newStore) shouldBe Left[
           ValidationError,
           Unit
         ](
-          OperationFailed
+          RepositoryOperationFailed
         )
       }
     }
@@ -165,11 +167,11 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
 
     describe("when asked to update a non-existent store manager's password") {
-      it("should return OperationFailed") {
+      it("should return RepositoryOperationFailed") {
         repository.getOrElse(fail()).updatePassword(StoreManager(wrongUsername, store), newPassword) shouldBe Left[
           ValidationError,
           EncryptedPassword
-        ](OperationFailed)
+        ](RepositoryOperationFailed)
       }
     }
 
@@ -181,9 +183,9 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
     }
 
     describe("when asked to delete a non-existent store manager") {
-      it("should return OperationFailed") {
+      it("should return RepositoryOperationFailed") {
         repository.getOrElse(fail()).unregister(StoreManager(wrongUsername, store)) shouldBe Left[ValidationError, StoreManager](
-          OperationFailed
+          RepositoryOperationFailed
         )
       }
     }

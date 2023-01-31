@@ -7,7 +7,8 @@
 package io.github.pervasivecats
 package users.customer.entities
 
-import users.Validated
+import io.github.pervasivecats.Validated
+
 import users.customer.Repository as CustomerRepository
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.Repository as UserRepository

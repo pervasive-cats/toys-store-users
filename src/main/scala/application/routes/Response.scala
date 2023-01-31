@@ -7,8 +7,10 @@
 package io.github.pervasivecats
 package application.routes
 
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.users.storemanager.entities.StoreManager
+
 import users.customer.entities.Customer
-import users.Validated
 
 sealed trait Response[A] {
 
@@ -18,6 +20,8 @@ sealed trait Response[A] {
 object Response {
 
   final case class CustomerResponse(result: Validated[Customer]) extends Response[Customer]
+
+  final case class StoreManagerResponse(result: Validated[StoreManager]) extends Response[StoreManager]
 
   final case class EmptyResponse(result: Validated[Unit]) extends Response[Unit]
 }

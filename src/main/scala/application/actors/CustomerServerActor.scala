@@ -14,6 +14,9 @@ import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
 
+import io.github.pervasivecats.ValidationError
+import io.github.pervasivecats.application.RequestProcessingFailed
+
 import akka.actor.ActorSystem
 import akka.actor.typed.*
 import akka.actor.typed.scaladsl.Behaviors
@@ -26,17 +29,11 @@ import application.actors.MessageBrokerCommand.CustomerUnregistered
 import application.actors.RootCommand.Startup
 import application.routes.Response.{CustomerResponse, EmptyResponse}
 import users.customer.Repository as CustomerRepository
-import users.ValidationError
 import users.customer.entities.Customer
 import users.customer.entities.CustomerOps.updated
 import users.user.services.PasswordAlgorithm
 
 object CustomerServerActor {
-
-  case object ProcessingFailed extends ValidationError {
-
-    override val message: String = "The request processing has failed"
-  }
 
   def apply(
     root: ActorRef[RootCommand],
@@ -54,7 +51,7 @@ object CustomerServerActor {
               e <- summon[PasswordAlgorithm].encrypt(password)
               _ <- customerRepository.register(customer, e)
             } yield customer).onComplete {
-              case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](ProcessingFailed))
+              case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](RequestProcessingFailed))
               case Success(value) => replyTo ! CustomerResponse(value)
             }(ctx.executionContext)
             Behaviors.same[CustomerServerCommand]
@@ -65,7 +62,7 @@ object CustomerServerActor {
               _ <- summon[PasswordAlgorithm].check(e, password)
               _ <- customerRepository.deregister(c)
             } yield ()).onComplete {
-              case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](ProcessingFailed))
+              case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](RequestProcessingFailed))
               case Success(value) =>
                 value.foreach(_ => messageBrokerActor ! CustomerUnregistered(email))
                 replyTo ! EmptyResponse(value)
@@ -77,7 +74,7 @@ object CustomerServerActor {
               e <- customerRepository.findPassword(c)
               _ <- summon[PasswordAlgorithm].check(e, password)
             } yield c).onComplete {
-              case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](ProcessingFailed))
+              case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](RequestProcessingFailed))
               case Success(value) => replyTo ! CustomerResponse(value)
             }
             Behaviors.same[CustomerServerCommand]
@@ -87,7 +84,7 @@ object CustomerServerActor {
               _ <- customerRepository.updateData(c, newFirstName, newLastName, newEmail, newUsername)
               n = c.updated(email = newEmail, username = newUsername, firstName = newFirstName, lastName = newLastName)
             } yield n).onComplete {
-              case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](ProcessingFailed))
+              case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](RequestProcessingFailed))
               case Success(value) => replyTo ! CustomerResponse(value)
             }
             Behaviors.same[CustomerServerCommand]
@@ -99,7 +96,7 @@ object CustomerServerActor {
               n <- summon[PasswordAlgorithm].encrypt(newPassword)
               _ <- customerRepository.updatePassword(c, n)
             } yield ()).onComplete {
-              case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](ProcessingFailed))
+              case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](RequestProcessingFailed))
               case Success(value) => replyTo ! EmptyResponse(value)
             }
             Behaviors.same[CustomerServerCommand]

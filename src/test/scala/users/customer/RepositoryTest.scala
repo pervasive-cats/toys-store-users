@@ -12,6 +12,8 @@ import java.nio.file.attribute.UserPrincipalNotFoundException
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 
+import io.github.pervasivecats.users.RepositoryOperationFailed
+
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
@@ -24,7 +26,7 @@ import org.testcontainers.utility.DockerImageName
 
 import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
-import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound, OperationFailed}
+import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound}
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.*
 import users.customer.entities.CustomerOps.updated
@@ -130,7 +132,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
           newCustomer.email,
           newCustomer.username
         ).left
-          .value shouldBe OperationFailed
+          .value shouldBe RepositoryOperationFailed
       }
     }
 
@@ -155,7 +157,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
           summon[PasswordAlgorithm]
             .encrypt(PlainPassword("passWORD2?").getOrElse(fail()))
             .getOrElse(fail())
-        db.updatePassword(customer, newPassword).left.value shouldBe OperationFailed
+        db.updatePassword(customer, newPassword).left.value shouldBe RepositoryOperationFailed
       }
     }
 
@@ -164,7 +166,7 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
         val db: Repository = repository.getOrElse(fail())
         db.findByEmail(email).left.value shouldBe CustomerNotFound
         db.findPassword(customer).left.value shouldBe CustomerNotFound
-        db.deregister(customer).left.value shouldBe OperationFailed
+        db.deregister(customer).left.value shouldBe RepositoryOperationFailed
       }
     }
 

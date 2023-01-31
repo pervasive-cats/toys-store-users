@@ -7,11 +7,12 @@
 package io.github.pervasivecats
 package users.customer.valueobjects
 
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.ValidationError
+
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string.MatchesRegex
-
-import users.{Validated, ValidationError}
 
 type NameComponentString = String Refined MatchesRegex["^[A-Z][a-z]{1,99}$"]
 

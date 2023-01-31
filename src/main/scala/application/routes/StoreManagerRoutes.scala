@@ -13,6 +13,11 @@ import scala.util.Success
 
 import io.github.pervasivecats.Validated
 import io.github.pervasivecats.ValidationError
+import io.github.pervasivecats.application.actors.StoreManagerServerCommand.DeregisterStoreManager
+import io.github.pervasivecats.application.actors.StoreManagerServerCommand.LoginStoreManager
+import io.github.pervasivecats.application.actors.StoreManagerServerCommand.RegisterStoreManager
+import io.github.pervasivecats.application.actors.StoreManagerServerCommand.UpdateStoreManagerPassword
+import io.github.pervasivecats.application.actors.StoreManagerServerCommand.UpdateStoreManagerStore
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.ActorSystem
@@ -30,30 +35,22 @@ import spray.json.DeserializationException
 import spray.json.JsonWriter
 
 import application.actors.*
-import application.actors.CustomerServerCommand.*
-import application.routes.CustomerEntity.{
-  CustomerDeregistrationEntity,
-  CustomerLoginEntity,
-  CustomerRegistrationEntity,
-  CustomerUpdateDataEntity,
-  CustomerUpdatePasswordEntity
-}
 import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
-import application.routes.Response.{CustomerResponse, EmptyResponse}
+import application.routes.Response.{EmptyResponse, StoreManagerResponse}
 import application.Serializers.given
 import application.routes.Routes.RequestFailed
-import users.customer.entities.Customer
-import users.customer.valueobjects.{Email, NameComponent}
-import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound}
+import application.routes.StoreManagerEntity.*
+import users.storemanager.Repository.{StoreManagerAlreadyPresent, StoreManagerNotFound}
+import users.storemanager.entities.StoreManager
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
 
-private object CustomerRoutes extends SprayJsonSupport with DefaultJsonProtocol with Directives {
+private object StoreManagerRoutes extends SprayJsonSupport with DefaultJsonProtocol with Directives {
 
   private given Timeout = 30.seconds
 
-  private def route[A: FromRequestUnmarshaller, B <: CustomerServerCommand, C <: Response[D], D: JsonWriter](
-    server: ActorRef[CustomerServerCommand],
+  private def route[A: FromRequestUnmarshaller, B <: StoreManagerServerCommand, C <: Response[D], D: JsonWriter](
+    server: ActorRef[StoreManagerServerCommand],
     request: A => ActorRef[C] => B,
     responseHandler: C => Route
   )(
@@ -67,82 +64,82 @@ private object CustomerRoutes extends SprayJsonSupport with DefaultJsonProtocol 
       }
     }
 
-  private def handleCustomerAndPasswordResult(result: Validated[Unit]): Route = result match {
+  private def handleStoreManagerAndPasswordResult(result: Validated[Unit]): Route = result match {
     case Right(value) => complete(ResultResponseEntity(value))
     case Left(error) =>
       error match {
-        case CustomerNotFound => complete(StatusCodes.NotFound, ErrorResponseEntity(error))
+        case StoreManagerNotFound => complete(StatusCodes.NotFound, ErrorResponseEntity(error))
         case PasswordNotMatching => complete(StatusCodes.BadRequest, ErrorResponseEntity(error))
         case _ => complete(StatusCodes.InternalServerError, ErrorResponseEntity(error))
       }
   }
 
-  private def handleCustomerResult(result: Validated[Customer]): Route = result match {
+  private def handleStoreManagerResult(result: Validated[StoreManager]): Route = result match {
     case Right(value) => complete(ResultResponseEntity(value))
     case Left(error) =>
       error match {
-        case CustomerNotFound => complete(StatusCodes.NotFound, ErrorResponseEntity(error))
+        case StoreManagerNotFound => complete(StatusCodes.NotFound, ErrorResponseEntity(error))
         case _ => complete(StatusCodes.InternalServerError, ErrorResponseEntity(error))
       }
   }
 
-  def apply(server: ActorRef[CustomerServerCommand])(using ActorSystem[_]): Route =
+  def apply(server: ActorRef[StoreManagerServerCommand])(using ActorSystem[_]): Route =
     concat(
-      path("customer") {
+      path("store_manager") {
         concat(
           post {
-            route[CustomerRegistrationEntity, RegisterCustomer, CustomerResponse, Customer](
+            route[StoreManagerRegistrationEntity, RegisterStoreManager, StoreManagerResponse, StoreManager](
               server,
-              e => RegisterCustomer(Customer(e.firstName, e.lastName, e.email, e.username), e.password, _),
+              e => RegisterStoreManager(StoreManager(e.username, e.store), e.password, _),
               _.result match {
                 case Right(value) => complete(ResultResponseEntity(value))
                 case Left(error) =>
                   error match {
-                    case CustomerAlreadyPresent => complete(StatusCodes.BadRequest, ErrorResponseEntity(error))
+                    case StoreManagerAlreadyPresent => complete(StatusCodes.BadRequest, ErrorResponseEntity(error))
                     case _ => complete(StatusCodes.InternalServerError, ErrorResponseEntity(error))
                   }
               }
             )
           },
           delete {
-            route[CustomerDeregistrationEntity, DeregisterCustomer, EmptyResponse, Unit](
+            route[StoreManagerDeregistrationEntity, DeregisterStoreManager, EmptyResponse, Unit](
               server,
-              e => DeregisterCustomer(e.email, e.password, _),
-              r => handleCustomerAndPasswordResult(r.result)
+              e => DeregisterStoreManager(e.username, e.password, _),
+              r => handleStoreManagerAndPasswordResult(r.result)
             )
           },
           put {
-            route[CustomerUpdateDataEntity, UpdateCustomerData, CustomerResponse, Customer](
+            route[StoreManagerUpdateStoreEntity, UpdateStoreManagerStore, StoreManagerResponse, StoreManager](
               server,
-              e => UpdateCustomerData(e.email, e.newEmail, e.newUsername, e.newFirstName, e.newLastName, _),
-              r => handleCustomerResult(r.result)
+              e => UpdateStoreManagerStore(e.username, e.newStore, _),
+              r => handleStoreManagerResult(r.result)
             )
           }
         )
       },
-      path("customer" / "login") {
+      path("store_manager" / "login") {
         put {
-          route[CustomerLoginEntity, LoginCustomer, CustomerResponse, Customer](
+          route[StoreManagerLoginEntity, LoginStoreManager, StoreManagerResponse, StoreManager](
             server,
-            e => LoginCustomer(e.email, e.password, _),
+            e => LoginStoreManager(e.username, e.password, _),
             _.result match {
               case Right(value) => complete(ResultResponseEntity(value))
               case Left(error) =>
                 error match {
-                  case CustomerNotFound | PasswordNotMatching =>
-                    complete(StatusCodes.NotFound, ErrorResponseEntity(CustomerNotFound))
+                  case StoreManagerNotFound | PasswordNotMatching =>
+                    complete(StatusCodes.NotFound, ErrorResponseEntity(StoreManagerNotFound))
                   case _ => complete(StatusCodes.InternalServerError, ErrorResponseEntity(error))
                 }
             }
           )
         }
       },
-      path("customer" / "password") {
+      path("store_manager" / "password") {
         put {
-          route[CustomerUpdatePasswordEntity, UpdateCustomerPassword, EmptyResponse, Unit](
+          route[StoreManagerUpdatePasswordEntity, UpdateStoreManagerPassword, EmptyResponse, Unit](
             server,
-            e => UpdateCustomerPassword(e.email, e.password, e.newPassword, _),
-            r => handleCustomerAndPasswordResult(r.result)
+            e => UpdateStoreManagerPassword(e.username, e.password, e.newPassword, _),
+            r => handleStoreManagerAndPasswordResult(r.result)
           )
         }
       }

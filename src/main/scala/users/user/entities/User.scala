@@ -7,7 +7,9 @@
 package io.github.pervasivecats
 package users.user.entities
 
-import users.{Validated, ValidationError}
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.ValidationError
+
 import users.user.*
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.{PlainPassword, Username}

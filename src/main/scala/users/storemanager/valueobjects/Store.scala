@@ -7,12 +7,13 @@
 package io.github.pervasivecats
 package users.storemanager.valueobjects
 
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.ValidationError
+
 import eu.timepit.refined.api.RefType.applyRef
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto.given
 import eu.timepit.refined.numeric.NonNegative
-
-import users.{Validated, ValidationError}
 
 type StoreId = Long Refined NonNegative
 

@@ -10,6 +10,8 @@ package application.actors
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 
+import io.github.pervasivecats.ValidationError
+
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRef
@@ -34,7 +36,6 @@ import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.*
-import users.ValidationError
 import users.customer.Repository.*
 import users.customer.entities.CustomerOps.updated
 import users.user.services.PasswordAlgorithm.PasswordNotMatching

@@ -7,10 +7,12 @@
 package io.github.pervasivecats
 package users.user.services
 
+import io.github.pervasivecats.Validated
+import io.github.pervasivecats.ValidationError
+
 import at.favre.lib.crypto.bcrypt.*
 import eu.timepit.refined.auto.given
 
-import users.{Validated, ValidationError}
 import users.user.valueobjects.{EncryptedPassword, PlainPassword}
 
 trait PasswordAlgorithm {
