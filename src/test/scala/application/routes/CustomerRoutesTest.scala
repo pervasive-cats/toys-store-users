@@ -57,6 +57,13 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
   private val password: PlainPassword = PlainPassword("Password1!").getOrElse(fail())
   private val customer: Customer = Customer(firstName, lastName, email, username)
 
+  private def checkCustomer(actualCustomer: Customer, effectiveCustomer: Customer): Unit = {
+    actualCustomer.email shouldBe effectiveCustomer.email
+    actualCustomer.firstName shouldBe effectiveCustomer.firstName
+    actualCustomer.lastName shouldBe effectiveCustomer.lastName
+    actualCustomer.username shouldBe effectiveCustomer.username
+  }
+
   describe("A customer service") {
     describe("when sending a POST request to the /customer endpoint") {
       it("should send a response creating a new user if everything is correct") {
@@ -73,7 +80,7 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         test ~> check {
           status shouldBe StatusCodes.OK
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ResultResponseEntity[Customer]].result shouldBe customer
+          checkCustomer(entityAs[ResultResponseEntity[Customer]].result, customer)
         }
       }
 
@@ -198,7 +205,7 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         test ~> check {
           status shouldBe StatusCodes.OK
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ResultResponseEntity[Customer]].result shouldBe newCustomer
+          checkCustomer(entityAs[ResultResponseEntity[Customer]].result, newCustomer)
         }
       }
 
@@ -250,7 +257,7 @@ class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJs
         test ~> check {
           status shouldBe StatusCodes.OK
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ResultResponseEntity[Customer]].result shouldBe customer
+          checkCustomer(entityAs[ResultResponseEntity[Customer]].result, customer)
         }
       }
 

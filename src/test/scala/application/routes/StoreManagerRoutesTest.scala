@@ -55,6 +55,11 @@ class StoreManagerRoutesTest extends AnyFunSpec with ScalatestRouteTest with Spr
   private val password: PlainPassword = PlainPassword("Password1!").getOrElse(fail())
   private val storeManager: StoreManager = StoreManager(username, store)
 
+  private def checkStoreManager(actualStoreManager: StoreManager, effectiveStoreManager: StoreManager): Unit = {
+    actualStoreManager.store shouldBe effectiveStoreManager.store
+    actualStoreManager.username shouldBe effectiveStoreManager.username
+  }
+
   describe("A store manager service") {
     describe("when sending a POST request to the /store_manager endpoint") {
       it("should send a response creating a new user if everything is correct") {
@@ -71,7 +76,7 @@ class StoreManagerRoutesTest extends AnyFunSpec with ScalatestRouteTest with Spr
         test ~> check {
           status shouldBe StatusCodes.OK
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ResultResponseEntity[StoreManager]].result shouldBe storeManager
+          checkStoreManager(entityAs[ResultResponseEntity[StoreManager]].result, storeManager)
         }
       }
 
@@ -190,7 +195,7 @@ class StoreManagerRoutesTest extends AnyFunSpec with ScalatestRouteTest with Spr
         test ~> check {
           status shouldBe StatusCodes.OK
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ResultResponseEntity[StoreManager]].result shouldBe newStoreManager
+          checkStoreManager(entityAs[ResultResponseEntity[StoreManager]].result, newStoreManager)
         }
       }
 
@@ -240,7 +245,7 @@ class StoreManagerRoutesTest extends AnyFunSpec with ScalatestRouteTest with Spr
         test ~> check {
           status shouldBe StatusCodes.OK
           contentType shouldBe ContentTypes.`application/json`
-          entityAs[ResultResponseEntity[StoreManager]].result shouldBe storeManager
+          checkStoreManager(entityAs[ResultResponseEntity[StoreManager]].result, storeManager)
         }
       }
 

@@ -82,6 +82,14 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
   private val otherPassword: PlainPassword = PlainPassword("passWORD2?").getOrElse(fail())
   private val storeManager: StoreManager = StoreManager(username, store)
 
+  private def checkStoreManager(storeManager: StoreManager): Unit =
+    storeManagerResponseProbe.expectMessageType[StoreManagerResponse](10.seconds).result match {
+      case Left(_) => fail()
+      case Right(m) =>
+        m.store shouldBe storeManager.store
+        m.username shouldBe storeManager.username
+    }
+
   describe("A store manager server actor") {
     describe("when first started up") {
       it("should notify the root actor of its start") {
@@ -95,15 +103,9 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should be present in the database") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! LoginStoreManager(username, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! DeregisterStoreManager(username, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
       }
@@ -113,10 +115,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should not be allowed") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! LoginStoreManager(username, otherPassword, storeManagerResponseProbe.ref)
         storeManagerResponseProbe.expectMessage(
           10.seconds,
@@ -131,10 +130,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should not be present in the database") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! DeregisterStoreManager(username, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         server ! LoginStoreManager(username, password, storeManagerResponseProbe.ref)
@@ -149,10 +145,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should not be allowed") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! DeregisterStoreManager(username, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Left[ValidationError, Unit](PasswordNotMatching)))
         server ! DeregisterStoreManager(username, password, emptyResponseProbe.ref)
@@ -163,28 +156,17 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
     describe("after being registered and then their data gets updated") {
       it("should show the update") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
-        val newStoreManager: StoreManager = storeManager.updateStore(
-          Store(2).getOrElse(fail())
-        )
+        val newStoreManager: StoreManager = storeManager.updateStore(Store(2).getOrElse(fail()))
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! UpdateStoreManagerStore(
           username,
           newStoreManager.store,
           storeManagerResponseProbe.ref
         )
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](newStoreManager))
-        )
+        checkStoreManager(newStoreManager)
         server ! LoginStoreManager(newStoreManager.username, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](newStoreManager))
-        )
+        checkStoreManager(newStoreManager)
         server ! DeregisterStoreManager(newStoreManager.username, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
       }
@@ -193,9 +175,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
     describe("when their data gets updated but they were never registered in the first place") {
       it("should not be allowed") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
-        val newStoreManager: StoreManager = storeManager.updateStore(
-          Store(2).getOrElse(fail())
-        )
+        val newStoreManager: StoreManager = storeManager.updateStore(Store(2).getOrElse(fail()))
         server ! UpdateStoreManagerStore(
           username,
           newStoreManager.store,
@@ -212,10 +192,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should show the update") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! UpdateStoreManagerPassword(username, password, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         server ! LoginStoreManager(username, password, storeManagerResponseProbe.ref)
@@ -224,10 +201,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
           StoreManagerResponse(Left[ValidationError, StoreManager](PasswordNotMatching))
         )
         server ! LoginStoreManager(username, otherPassword, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! DeregisterStoreManager(username, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
       }
@@ -237,10 +211,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should not be allowed") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! UpdateStoreManagerPassword(username, otherPassword, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Left[ValidationError, Unit](PasswordNotMatching)))
         server ! DeregisterStoreManager(username, password, emptyResponseProbe.ref)
@@ -273,10 +244,7 @@ class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll wi
       it("should not allow a new registration") {
         val server: ActorRef[StoreManagerServerCommand] = storeManagerServer.getOrElse(fail())
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
-        storeManagerResponseProbe.expectMessage(
-          10.seconds,
-          StoreManagerResponse(Right[ValidationError, StoreManager](storeManager))
-        )
+        checkStoreManager(storeManager)
         server ! RegisterStoreManager(storeManager, password, storeManagerResponseProbe.ref)
         storeManagerResponseProbe.expectMessage(
           10.seconds,

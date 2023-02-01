@@ -88,6 +88,16 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
   private val otherPassword: PlainPassword = PlainPassword("passWORD2?").getOrElse(fail())
   private val customer: Customer = Customer(firstName, lastName, email, username)
 
+  private def checkCustomer(customer: Customer): Unit =
+    customerResponseProbe.expectMessageType[CustomerResponse](10.seconds).result match {
+      case Left(_) => fail()
+      case Right(c) =>
+        c.email shouldBe customer.email
+        c.lastName shouldBe customer.lastName
+        c.firstName shouldBe customer.firstName
+        c.username shouldBe customer.username
+    }
+
   describe("A customer server actor") {
     describe("when first started up") {
       it("should notify the root actor of its start") {
@@ -101,9 +111,9 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should be present in the database") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! LoginCustomer(email, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
@@ -114,7 +124,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should not be allowed") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! LoginCustomer(email, otherPassword, customerResponseProbe.ref)
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Left[ValidationError, Customer](PasswordNotMatching)))
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
@@ -127,7 +137,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should not be present in the database") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
@@ -140,7 +150,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should not be allowed") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! DeregisterCustomer(email, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Left[ValidationError, Unit](PasswordNotMatching)))
         messageBrokerProbe.expectNoMessage(10.seconds)
@@ -160,7 +170,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
           Username("l0033gi").getOrElse(fail())
         )
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! UpdateCustomerData(
           email,
           newCustomer.email,
@@ -169,9 +179,9 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
           newCustomer.lastName,
           customerResponseProbe.ref
         )
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](newCustomer)))
+        checkCustomer(newCustomer)
         server ! LoginCustomer(newCustomer.email, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](newCustomer)))
+        checkCustomer(newCustomer)
         server ! DeregisterCustomer(newCustomer.email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(newCustomer.email))
@@ -203,13 +213,13 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should show the update") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! UpdateCustomerPassword(email, password, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         server ! LoginCustomer(email, password, customerResponseProbe.ref)
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Left[ValidationError, Customer](PasswordNotMatching)))
         server ! LoginCustomer(email, otherPassword, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! DeregisterCustomer(email, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
         messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
@@ -220,7 +230,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should not be allowed") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! UpdateCustomerPassword(email, otherPassword, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Left[ValidationError, Unit](PasswordNotMatching)))
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
@@ -252,7 +262,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
       it("should not allow a new registration") {
         val server: ActorRef[CustomerServerCommand] = customerServer.getOrElse(fail())
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
-        customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Right[ValidationError, Customer](customer)))
+        checkCustomer(customer)
         server ! RegisterCustomer(customer, password, customerResponseProbe.ref)
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Left[ValidationError, Customer](CustomerAlreadyPresent)))
       }
