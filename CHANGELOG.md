@@ -1,3 +1,10 @@
+# [1.0.0-beta.8](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2023-01-30)
+
+
+### Bug Fixes
+
+* fix equals and hashcode methods in entities implementation ([6de5471](https://github.com/pervasive-cats/toys-store-users/commit/6de54711d8f997bab7f4b6c3a735c8837b94bd82))
+
 # [1.0.0-beta.7](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2023-01-29)
 
 
