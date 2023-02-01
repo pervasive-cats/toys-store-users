@@ -6,7 +6,7 @@ Global / excludeLintKeys := Set(idePackagePrefix)
 
 Test / fork := true
 
-ThisBuild / scalaVersion := "3.2.2-RC2"
+ThisBuild / scalaVersion := "3.2.2"
 
 ThisBuild / scalafixDependencies ++= Seq(
   "com.github.liancheng" %% "organize-imports" % "0.6.0",
