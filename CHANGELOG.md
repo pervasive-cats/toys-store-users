@@ -1,3 +1,16 @@
+# [1.0.0-beta.9](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2023-02-01)
+
+
+### Bug Fixes
+
+* move test classes to correct packages, rename events package to domainevents ([58ab59f](https://github.com/pervasive-cats/toys-store-users/commit/58ab59f7e34601e4b7e8b9b24241944b35770cf4))
+
+
+### Features
+
+* add AdministrationServerActor and administration routes ([b40afb8](https://github.com/pervasive-cats/toys-store-users/commit/b40afb8b22518501edb935a696ecdf0edd4ea970))
+* add StoreManagerServer actor and store manager routes ([620d10a](https://github.com/pervasive-cats/toys-store-users/commit/620d10ac7bc642342534424a247395442ae3f561))
+
 # [1.0.0-beta.8](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2023-01-30)
 
 
