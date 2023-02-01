@@ -30,16 +30,16 @@ import spray.json.DeserializationException
 import spray.json.JsonWriter
 
 import application.actors.*
-import application.actors.CustomerServerCommand.*
-import application.routes.CustomerEntity.{
+import application.actors.commands.CustomerServerCommand.*
+import entities.CustomerEntity.{
   CustomerDeregistrationEntity,
   CustomerLoginEntity,
   CustomerRegistrationEntity,
   CustomerUpdateDataEntity,
   CustomerUpdatePasswordEntity
 }
-import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
-import application.routes.Response.{CustomerResponse, EmptyResponse}
+import entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
+import entities.Response.{CustomerResponse, EmptyResponse}
 import application.Serializers.given
 import application.routes.Routes.RequestFailed
 import users.customer.entities.Customer
@@ -47,6 +47,8 @@ import users.customer.valueobjects.{Email, NameComponent}
 import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound}
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
+import application.actors.commands.CustomerServerCommand
+import entities.Response
 
 private object CustomerRoutes extends SprayJsonSupport with DefaultJsonProtocol with Directives {
 

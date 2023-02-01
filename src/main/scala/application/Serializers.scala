@@ -7,11 +7,7 @@
 package io.github.pervasivecats
 package application
 
-import scala.collection.immutable.AbstractSeq
-import scala.collection.immutable.LinearSeq
-
 import io.github.pervasivecats.Validated
-import io.github.pervasivecats.users.administration.entities.Administration
 
 import akka.util.Collections
 import eu.timepit.refined.auto.given
@@ -21,16 +17,15 @@ import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
 import spray.json.JsonFormat
-import spray.json.JsonWriter
 import spray.json.RootJsonFormat
 import spray.json.deserializationError
 import spray.json.enrichAny
-import spray.json.jsonReader
 
+import users.administration.entities.Administration
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.{PlainPassword, Username}
 import users.customer.entities.Customer
-import users.customer.events.CustomerUnregistered
+import users.customer.domainevents.CustomerUnregistered
 import users.storemanager.entities.StoreManager
 import users.storemanager.valueobjects.Store
 

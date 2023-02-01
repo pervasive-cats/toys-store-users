@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.customer.events
+package users.customer.domainevents
 
 import users.customer.valueobjects.Email
 

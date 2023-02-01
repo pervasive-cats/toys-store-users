@@ -26,11 +26,10 @@ import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
 import application.actors.*
-import application.actors.CustomerServerCommand.*
-import application.actors.MessageBrokerCommand.CustomerUnregistered
-import application.actors.RootCommand.Startup
-import application.routes.Response
-import application.routes.Response.{CustomerResponse, EmptyResponse}
+import commands.CustomerServerCommand.*
+import commands.MessageBrokerCommand.CustomerUnregistered
+import commands.RootCommand.Startup
+import application.routes.entities.Response.{CustomerResponse, EmptyResponse}
 import users.customer.Repository
 import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
@@ -39,6 +38,8 @@ import users.user.valueobjects.*
 import users.customer.Repository.*
 import users.customer.entities.CustomerOps.updated
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
+import commands.{CustomerServerCommand, MessageBrokerCommand, RootCommand}
+import application.routes.entities.Response
 
 class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 

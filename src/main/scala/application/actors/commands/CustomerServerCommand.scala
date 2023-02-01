@@ -5,11 +5,11 @@
  */
 
 package io.github.pervasivecats
-package application.actors
+package application.actors.commands
 
 import akka.actor.typed.ActorRef
 
-import application.routes.Response.{CustomerResponse, EmptyResponse}
+import application.routes.entities.Response.{CustomerResponse, EmptyResponse}
 import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.{PlainPassword, Username}

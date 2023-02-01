@@ -21,10 +21,9 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 
-import application.actors.RootCommand.Startup
-import application.actors.MessageBrokerCommand
-import application.actors.StoreManagerServerCommand
+import commands.RootCommand.Startup
 import application.routes.Routes
+import commands.{AdministrationServerCommand, CustomerServerCommand, MessageBrokerCommand, RootCommand, StoreManagerServerCommand}
 
 object RootActor {
 

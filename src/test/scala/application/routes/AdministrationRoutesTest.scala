@@ -26,19 +26,19 @@ import spray.json.RootJsonReader
 import spray.json.RootJsonWriter
 import spray.json.given
 
-import application.actors.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
-import application.actors.AdministrationServerCommand.*
-import application.routes.Response.{EmptyResponse, AdministrationResponse}
+import application.actors.commands.AdministrationServerCommand.*
+import entities.Response.{EmptyResponse, AdministrationResponse}
 import application.routes.Routes
 import application.Serializers.given
-import application.routes.AdministrationEntity.*
-import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
+import entities.AdministrationEntity.*
+import entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
 import application.routes.Routes.{DeserializationFailed, RequestFailed}
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
 import users.administration.Repository.*
 import users.RepositoryOperationFailed
 import users.administration.entities.Administration
+import application.actors.commands.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 
 class AdministrationRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJsonSupport {
 

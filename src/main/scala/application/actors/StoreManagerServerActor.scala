@@ -22,16 +22,16 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 
-import application.actors.{RootCommand, StoreManagerServerCommand}
-import application.actors.RootCommand.Startup
-import application.actors.StoreManagerServerCommand.*
-import application.routes.Response.{EmptyResponse, StoreManagerResponse}
+import commands.RootCommand.Startup
+import commands.StoreManagerServerCommand.*
+import application.routes.entities.Response.{EmptyResponse, StoreManagerResponse}
 import application.RequestProcessingFailed
 import users.customer.entities.Customer
 import users.storemanager.Repository as StoreManagerRepository
 import users.storemanager.entities.StoreManager
 import users.storemanager.entities.StoreManagerOps.updateStore
 import users.user.services.PasswordAlgorithm
+import commands.{RootCommand, StoreManagerServerCommand}
 
 object StoreManagerServerActor {
 

@@ -13,11 +13,6 @@ import scala.util.Success
 
 import io.github.pervasivecats.Validated
 import io.github.pervasivecats.ValidationError
-import io.github.pervasivecats.application.actors.StoreManagerServerCommand.DeregisterStoreManager
-import io.github.pervasivecats.application.actors.StoreManagerServerCommand.LoginStoreManager
-import io.github.pervasivecats.application.actors.StoreManagerServerCommand.RegisterStoreManager
-import io.github.pervasivecats.application.actors.StoreManagerServerCommand.UpdateStoreManagerPassword
-import io.github.pervasivecats.application.actors.StoreManagerServerCommand.UpdateStoreManagerStore
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.ActorSystem
@@ -34,16 +29,25 @@ import spray.json.DefaultJsonProtocol
 import spray.json.DeserializationException
 import spray.json.JsonWriter
 
+import application.actors.commands.StoreManagerServerCommand.{
+  DeregisterStoreManager,
+  LoginStoreManager,
+  RegisterStoreManager,
+  UpdateStoreManagerPassword,
+  UpdateStoreManagerStore
+}
 import application.actors.*
-import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
-import application.routes.Response.{EmptyResponse, StoreManagerResponse}
+import entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
+import entities.Response.{EmptyResponse, StoreManagerResponse}
 import application.Serializers.given
 import application.routes.Routes.RequestFailed
-import application.routes.StoreManagerEntity.*
+import entities.StoreManagerEntity.*
 import users.storemanager.Repository.{StoreManagerAlreadyPresent, StoreManagerNotFound}
 import users.storemanager.entities.StoreManager
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
+import application.actors.commands.StoreManagerServerCommand
+import entities.Response
 
 private object StoreManagerRoutes extends SprayJsonSupport with DefaultJsonProtocol with Directives {
 

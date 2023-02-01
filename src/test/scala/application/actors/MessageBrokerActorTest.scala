@@ -40,11 +40,12 @@ import org.testcontainers.utility.DockerImageName
 import spray.json.enrichAny
 import spray.json.enrichString
 
-import application.actors.MessageBrokerCommand.CustomerUnregistered
-import application.actors.RootCommand.Startup
+import commands.MessageBrokerCommand.CustomerUnregistered
+import commands.RootCommand.Startup
 import application.Serializers.given
-import users.customer.events.CustomerUnregistered as CustomerUnregisteredEvent
+import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 import users.customer.valueobjects.Email
+import commands.{MessageBrokerCommand, RootCommand}
 
 class MessageBrokerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 

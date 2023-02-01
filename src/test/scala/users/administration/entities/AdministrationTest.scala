@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.administration
+package users.administration.entities
 
 import org.mockito.Mockito.*
 import org.scalatest.funspec.AnyFunSpec

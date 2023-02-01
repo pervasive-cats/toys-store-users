@@ -26,10 +26,9 @@ import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
 import application.actors.*
-import application.actors.StoreManagerServerCommand.*
-import application.actors.RootCommand.Startup
-import application.routes.Response
-import application.routes.Response.{EmptyResponse, StoreManagerResponse}
+import commands.StoreManagerServerCommand.*
+import commands.RootCommand.Startup
+import application.routes.entities.Response.{EmptyResponse, StoreManagerResponse}
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.*
 import users.storemanager.Repository.*
@@ -37,6 +36,8 @@ import users.storemanager.entities.StoreManagerOps.updateStore
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.storemanager.entities.StoreManager
 import users.storemanager.valueobjects.Store
+import commands.{RootCommand, StoreManagerServerCommand}
+import application.routes.entities.Response
 
 class StoreManagerServerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 

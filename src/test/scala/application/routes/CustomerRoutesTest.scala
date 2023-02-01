@@ -5,12 +5,11 @@
  */
 
 package io.github.pervasivecats
-package users.application.routes
+package application.routes
 
 import scala.concurrent.duration.DurationInt
 
 import io.github.pervasivecats.ValidationError
-import io.github.pervasivecats.users.RepositoryOperationFailed
 
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorSystem
@@ -27,13 +26,13 @@ import spray.json.RootJsonReader
 import spray.json.RootJsonWriter
 import spray.json.given
 
-import application.actors.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
-import application.actors.CustomerServerCommand.*
-import application.routes.Response.{CustomerResponse, EmptyResponse}
+import users.RepositoryOperationFailed
+import application.actors.commands.CustomerServerCommand.*
+import entities.Response.{CustomerResponse, EmptyResponse}
 import application.routes.Routes
 import application.Serializers.given
-import application.routes.CustomerEntity.*
-import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
+import entities.CustomerEntity.*
+import entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
 import application.routes.Routes.{DeserializationFailed, RequestFailed}
 import users.customer.entities.Customer
 import users.customer.entities.CustomerOps.updated
@@ -41,6 +40,7 @@ import users.customer.valueobjects.{Email, NameComponent}
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
 import users.customer.Repository.*
+import application.actors.commands.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 
 class CustomerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJsonSupport {
 

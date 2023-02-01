@@ -5,14 +5,14 @@
  */
 
 package io.github.pervasivecats
-package application.routes
+package application.routes.entities
 
 import spray.json.DefaultJsonProtocol.jsonFormat2
 import spray.json.DefaultJsonProtocol.jsonFormat3
 import spray.json.RootJsonFormat
 
-import users.user.valueobjects.{PlainPassword, Username}
 import application.Serializers.given
+import users.user.valueobjects.{PlainPassword, Username}
 
 sealed trait AdministrationEntity extends Entity
 

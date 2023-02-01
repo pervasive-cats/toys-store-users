@@ -26,13 +26,12 @@ import spray.json.RootJsonReader
 import spray.json.RootJsonWriter
 import spray.json.given
 
-import application.actors.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
-import application.actors.StoreManagerServerCommand.*
-import application.routes.Response.{EmptyResponse, StoreManagerResponse}
+import application.actors.commands.StoreManagerServerCommand.*
+import entities.Response.{EmptyResponse, StoreManagerResponse}
 import application.routes.Routes
 import application.Serializers.given
-import application.routes.StoreManagerEntity.*
-import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
+import entities.StoreManagerEntity.*
+import entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
 import application.routes.Routes.{DeserializationFailed, RequestFailed}
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
@@ -41,6 +40,7 @@ import users.RepositoryOperationFailed
 import users.storemanager.entities.StoreManager
 import users.storemanager.entities.StoreManagerOps.updateStore
 import users.storemanager.valueobjects.Store
+import application.actors.commands.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 
 class StoreManagerRoutesTest extends AnyFunSpec with ScalatestRouteTest with SprayJsonSupport {
 

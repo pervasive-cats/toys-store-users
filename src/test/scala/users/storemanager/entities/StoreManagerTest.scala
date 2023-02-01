@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.storemanager
+package users.storemanager.entities
 
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given

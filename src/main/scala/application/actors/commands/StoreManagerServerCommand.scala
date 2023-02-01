@@ -5,11 +5,11 @@
  */
 
 package io.github.pervasivecats
-package application.actors
+package application.actors.commands
 
 import akka.actor.typed.ActorRef
 
-import application.routes.Response.{EmptyResponse, StoreManagerResponse}
+import application.routes.entities.Response.{EmptyResponse, StoreManagerResponse}
 import users.storemanager.entities.StoreManager
 import users.storemanager.valueobjects.Store
 import users.user.valueobjects.{PlainPassword, Username}

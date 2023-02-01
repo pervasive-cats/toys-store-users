@@ -15,7 +15,6 @@ import scala.util.Failure
 import scala.util.Success
 
 import io.github.pervasivecats.ValidationError
-import io.github.pervasivecats.users.administration.entities.Administration
 
 import akka.actor.ActorSystem
 import akka.actor.typed.*
@@ -23,14 +22,15 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 
-import application.actors.{AdministrationServerCommand, RootCommand}
-import application.actors.RootCommand.Startup
-import application.actors.AdministrationServerCommand.*
-import application.routes.Response.{AdministrationResponse, EmptyResponse}
+import users.administration.entities.Administration
+import commands.RootCommand.Startup
+import commands.AdministrationServerCommand.*
+import application.routes.entities.Response.{AdministrationResponse, EmptyResponse}
 import application.RequestProcessingFailed
 import users.customer.entities.Customer
 import users.administration.Repository as AdministrationRepository
 import users.user.services.PasswordAlgorithm
+import commands.{AdministrationServerCommand, RootCommand}
 
 object AdministrationServerActor {
 

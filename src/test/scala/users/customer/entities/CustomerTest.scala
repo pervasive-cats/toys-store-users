@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.customer
+package users.customer.entities
 
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given
@@ -13,9 +13,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
 import users.customer.entities.Customer
+import users.customer.entities.CustomerOps.updated
 import users.customer.valueobjects.{Email, NameComponent}
 import users.user.valueobjects.Username
-import users.customer.entities.CustomerOps.updated
 
 class CustomerTest extends AnyFunSpec {
 

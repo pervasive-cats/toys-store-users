@@ -14,7 +14,6 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.SECONDS
 
 import io.github.pervasivecats.ValidationError
-import io.github.pervasivecats.users.RepositoryOperationFailed
 
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
@@ -29,6 +28,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
+import users.RepositoryOperationFailed
 import users.user.valueobjects.{EncryptedPassword, PlainPassword, Username}
 import users.storemanager.Repository
 import users.storemanager.Repository.{StoreManagerAlreadyPresent, StoreManagerNotFound}

@@ -5,11 +5,11 @@
  */
 
 package io.github.pervasivecats
-package application.actors
+package application.actors.commands
 
 import akka.actor.typed.ActorRef
 
-import application.routes.Response.{AdministrationResponse, EmptyResponse}
+import application.routes.entities.Response.{AdministrationResponse, EmptyResponse}
 import users.user.valueobjects.{PlainPassword, Username}
 
 sealed trait AdministrationServerCommand

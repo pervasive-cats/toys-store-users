@@ -12,8 +12,6 @@ import java.nio.file.attribute.UserPrincipalNotFoundException
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 
-import io.github.pervasivecats.users.RepositoryOperationFailed
-
 import com.dimafeng.testcontainers.JdbcDatabaseContainer.CommonParams
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
@@ -24,6 +22,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
+import users.RepositoryOperationFailed
 import users.customer.entities.Customer
 import users.customer.valueobjects.{Email, NameComponent}
 import users.customer.Repository.{CustomerAlreadyPresent, CustomerNotFound}

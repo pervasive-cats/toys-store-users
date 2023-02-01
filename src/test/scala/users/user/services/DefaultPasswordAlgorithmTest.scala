@@ -5,9 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.user
-
-import io.github.pervasivecats.users.user.services.PasswordAlgorithm.PasswordNotMatching
+package users.user.services
 
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given
@@ -15,6 +13,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
 import users.user.services.PasswordAlgorithm
+import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.PlainPassword
 
 class DefaultPasswordAlgorithmTest extends AnyFunSpec {

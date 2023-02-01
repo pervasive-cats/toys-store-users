@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package users.user
+package users.user.valueobjects
 
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given

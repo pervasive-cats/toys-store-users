@@ -13,8 +13,6 @@ import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters.MapHasAsJava
 import scala.util.Try
 
-import io.github.pervasivecats.application
-
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
 import akka.actor.typed.PostStop
@@ -31,12 +29,11 @@ import spray.json.JsonWriter
 import spray.json.enrichAny
 
 import application.Serializers.given
-import application.actors.RootCommand
-import application.actors.RootCommand.Startup
-import application.actors.MessageBrokerCommand
-import application.actors.MessageBrokerCommand.CustomerUnregistered
-import users.customer.events.CustomerUnregistered as CustomerUnregisteredEvent
+import commands.RootCommand.Startup
+import commands.MessageBrokerCommand.CustomerUnregistered
+import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 import application.Serializers.given
+import commands.{MessageBrokerCommand, RootCommand}
 
 object MessageBrokerActor {
 

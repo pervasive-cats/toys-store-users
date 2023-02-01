@@ -17,10 +17,9 @@ import akka.http.scaladsl.server.*
 import spray.json.DefaultJsonProtocol
 import spray.json.DeserializationException
 
-import application.actors.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 import application.routes.CustomerRoutes.complete
-import application.routes.Entity.ErrorResponseEntity
-import application.routes.Entity.given
+import entities.Entity.{ErrorResponseEntity, given}
+import application.actors.commands.{AdministrationServerCommand, CustomerServerCommand, StoreManagerServerCommand}
 
 object Routes extends Directives with SprayJsonSupport with DefaultJsonProtocol {
 

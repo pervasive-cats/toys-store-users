@@ -5,14 +5,14 @@
  */
 
 package io.github.pervasivecats
-package users.customer
+package users.customer.domainevents
 
 import eu.timepit.refined.auto.given
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
 
-import users.customer.events.CustomerUnregistered
+import users.customer.domainevents.CustomerUnregistered
 import users.customer.valueobjects.Email
 
 class CustomerUnregisteredTest extends AnyFunSpec {

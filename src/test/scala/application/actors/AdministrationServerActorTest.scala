@@ -26,15 +26,16 @@ import org.scalatest.matchers.should.Matchers.*
 import org.testcontainers.utility.DockerImageName
 
 import application.actors.*
-import application.actors.AdministrationServerCommand.*
-import application.actors.RootCommand.Startup
-import application.routes.Response
-import application.routes.Response.{AdministrationResponse, EmptyResponse}
+import commands.AdministrationServerCommand.*
+import commands.RootCommand.Startup
+import application.routes.entities.Response.{AdministrationResponse, EmptyResponse}
 import users.user.services.PasswordAlgorithm
 import users.user.valueobjects.*
 import users.administration.Repository.*
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.administration.entities.Administration
+import commands.{AdministrationServerCommand, RootCommand}
+import application.routes.entities.Response
 
 class AdministrationServerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 

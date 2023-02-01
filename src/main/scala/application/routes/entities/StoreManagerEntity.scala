@@ -5,7 +5,7 @@
  */
 
 package io.github.pervasivecats
-package application.routes
+package application.routes.entities
 
 import spray.json.DefaultJsonProtocol.jsonFormat2
 import spray.json.DefaultJsonProtocol.jsonFormat3

@@ -5,12 +5,12 @@
  */
 
 package io.github.pervasivecats
-package application.routes
+package application.routes.entities
 
 import io.github.pervasivecats.Validated
-import io.github.pervasivecats.users.administration.entities.Administration
-import io.github.pervasivecats.users.storemanager.entities.StoreManager
 
+import users.administration.entities.Administration
+import users.storemanager.entities.StoreManager
 import users.customer.entities.Customer
 
 sealed trait Response[A] {

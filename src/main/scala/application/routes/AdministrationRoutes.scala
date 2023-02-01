@@ -30,18 +30,19 @@ import spray.json.DeserializationException
 import spray.json.JsonWriter
 
 import application.actors.*
-import application.routes.Entity.{ErrorResponseEntity, ResultResponseEntity}
-import application.routes.Response.{AdministrationResponse, EmptyResponse}
+import entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
+import entities.Response.{AdministrationResponse, EmptyResponse}
 import application.Serializers.given
 import application.routes.Routes.RequestFailed
-import application.routes.AdministrationEntity.*
+import entities.AdministrationEntity.*
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import users.user.valueobjects.{PlainPassword, Username}
-import application.actors.AdministrationServerCommand
-import application.actors.AdministrationServerCommand.{LoginAdministration, UpdateAdministrationPassword}
-import application.routes.AdministrationEntity.{AdministrationLoginEntity, AdministrationUpdatePasswordEntity}
+import application.actors.commands.AdministrationServerCommand.{LoginAdministration, UpdateAdministrationPassword}
+import entities.AdministrationEntity.{AdministrationLoginEntity, AdministrationUpdatePasswordEntity}
 import users.administration.entities.Administration
 import users.administration.Repository.AdministrationNotFound
+import application.actors.commands.AdministrationServerCommand
+import entities.Response
 
 private object AdministrationRoutes extends SprayJsonSupport with DefaultJsonProtocol with Directives {
 

@@ -5,12 +5,11 @@
  */
 
 package io.github.pervasivecats
-package application.routes
+package application.routes.entities
 
 import scala.reflect.ClassTag
 
 import io.github.pervasivecats.ValidationError
-import io.github.pervasivecats.users.administration.Repository.AdministrationNotFound
 
 import spray.json.DefaultJsonProtocol.jsonFormat2
 import spray.json.DefaultJsonProtocol.jsonFormat3
@@ -24,6 +23,7 @@ import spray.json.RootJsonFormat
 import spray.json.deserializationError
 import spray.json.enrichAny
 
+import users.administration.Repository.AdministrationNotFound
 import application.Serializers.given
 import application.actors.CustomerServerActor
 import application.routes.Routes.{DeserializationFailed, RequestFailed}
