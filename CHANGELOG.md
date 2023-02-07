@@ -1,3 +1,10 @@
+# [1.0.0-beta.10](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2023-02-07)
+
+
+### Bug Fixes
+
+* make application accept parameters from command line for configuration path instead of default location ([10d7bdc](https://github.com/pervasive-cats/toys-store-users/commit/10d7bdc31fce19fdd291f4dbdd8e356a2ddc9cd8))
+
 # [1.0.0-beta.9](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2023-02-01)
 
 
