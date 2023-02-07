@@ -5,13 +5,16 @@
  */
 
 package io.github.pervasivecats
-package application
 
 import akka.actor.typed.ActorSystem
-import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-
 import application.actors.*
 
+import java.nio.file.Paths
+
 @main
-def main(): Unit = ActorSystem(RootActor(ConfigFactory.load()), name = "root_actor")
+def main(path: String): Unit =
+  ActorSystem(
+    RootActor(ConfigFactory.parseFile(Paths.get(path).toFile).withFallback(ConfigFactory.defaultApplication())),
+    name = "root_actor"
+  )
