@@ -70,7 +70,7 @@ object StoreManagerServerActor {
             } yield m).onComplete {
               case Failure(_) => replyTo ! StoreManagerResponse(Left[ValidationError, StoreManager](RequestProcessingFailed))
               case Success(value) => replyTo ! StoreManagerResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[StoreManagerServerCommand]
           case UpdateStoreManagerStore(username, newStore, replyTo) =>
             Future(for {
@@ -80,7 +80,7 @@ object StoreManagerServerActor {
             } yield n).onComplete {
               case Failure(_) => replyTo ! StoreManagerResponse(Left[ValidationError, StoreManager](RequestProcessingFailed))
               case Success(value) => replyTo ! StoreManagerResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[StoreManagerServerCommand]
           case UpdateStoreManagerPassword(username, password, newPassword, replyTo) =>
             Future(for {
@@ -92,7 +92,7 @@ object StoreManagerServerActor {
             } yield ()).onComplete {
               case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](RequestProcessingFailed))
               case Success(value) => replyTo ! EmptyResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[StoreManagerServerCommand]
         }
     }

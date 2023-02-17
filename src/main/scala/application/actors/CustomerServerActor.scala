@@ -76,7 +76,7 @@ object CustomerServerActor {
             } yield c).onComplete {
               case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](RequestProcessingFailed))
               case Success(value) => replyTo ! CustomerResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[CustomerServerCommand]
           case UpdateCustomerData(email, newEmail, newUsername, newFirstName, newLastName, replyTo) =>
             Future(for {
@@ -86,7 +86,7 @@ object CustomerServerActor {
             } yield n).onComplete {
               case Failure(_) => replyTo ! CustomerResponse(Left[ValidationError, Customer](RequestProcessingFailed))
               case Success(value) => replyTo ! CustomerResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[CustomerServerCommand]
           case UpdateCustomerPassword(email, password, newPassword, replyTo) =>
             Future(for {
@@ -98,7 +98,7 @@ object CustomerServerActor {
             } yield ()).onComplete {
               case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](RequestProcessingFailed))
               case Success(value) => replyTo ! EmptyResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[CustomerServerCommand]
         }
     }

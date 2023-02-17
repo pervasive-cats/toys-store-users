@@ -49,7 +49,7 @@ object AdministrationServerActor {
             } yield a).onComplete {
               case Failure(_) => replyTo ! AdministrationResponse(Left[ValidationError, Administration](RequestProcessingFailed))
               case Success(value) => replyTo ! AdministrationResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[AdministrationServerCommand]
           case UpdateAdministrationPassword(username, password, newPassword, replyTo) =>
             Future(for {
@@ -61,7 +61,7 @@ object AdministrationServerActor {
             } yield ()).onComplete {
               case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](RequestProcessingFailed))
               case Success(value) => replyTo ! EmptyResponse(value)
-            }
+            }(ctx.executionContext)
             Behaviors.same[AdministrationServerCommand]
         }
     }

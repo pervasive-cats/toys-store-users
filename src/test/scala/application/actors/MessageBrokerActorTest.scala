@@ -12,11 +12,9 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
-
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.MapHasAsJava
-
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRef
@@ -39,13 +37,14 @@ import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.DockerImageName
 import spray.json.enrichAny
 import spray.json.enrichString
-
 import commands.MessageBrokerCommand.CustomerUnregistered
 import commands.RootCommand.Startup
 import application.Serializers.given
 import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 import users.customer.valueobjects.Email
+
 import commands.{MessageBrokerCommand, RootCommand}
+import io.github.pervasivecats.application.routes.entities.Entity.ResultResponseEntity
 
 class MessageBrokerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 
@@ -75,7 +74,10 @@ class MessageBrokerActorTest extends AnyFunSpec with TestContainerForAll with Be
         Map(
           "exchange" -> message.getEnvelope.getExchange,
           "routingKey" -> message.getEnvelope.getRoutingKey,
-          "body" -> String(message.getBody, StandardCharsets.UTF_8)
+          "body" -> String(message.getBody, StandardCharsets.UTF_8),
+          "contentType" -> message.getProperties.getContentType,
+          "correlationId" -> message.getProperties.getCorrelationId,
+          "replyTo" -> message.getProperties.getReplyTo
         )
       )
 
@@ -97,16 +99,22 @@ class MessageBrokerActorTest extends AnyFunSpec with TestContainerForAll with Be
     factory.setPort(messageBrokerConfig.getInt("portNumber"))
     val connection: Connection = factory.newConnection()
     val channel: Channel = connection.createChannel()
-    channel.exchangeDeclare("users", BuiltinExchangeType.TOPIC, true)
-    channel.queueDeclare("shopping_users", true, false, false, Map.empty.asJava)
-    channel.queueBind("shopping_users", "users", "customer")
-    channel.queueDeclare("carts_users", true, false, false, Map.empty.asJava)
-    channel.queueBind("carts_users", "users", "customer")
-    channel.queueDeclare("payments_users", true, false, false, Map.empty.asJava)
-    channel.queueBind("payments_users", "users", "customer")
-    channel.basicConsume("shopping_users", true, forwardToQueue(shoppingQueue), (_: String) => {})
-    channel.basicConsume("carts_users", true, forwardToQueue(cartsQueue), (_: String) => {})
-    channel.basicConsume("payments_users", true, forwardToQueue(paymentsQueue), (_: String) => {})
+    val couples: Seq[(String, String)] = Seq(
+      "users" -> "shopping",
+      "users" -> "carts",
+      "users" -> "payments"
+    )
+    val queueArgs: Map[String, String] = Map("x-dead-letter-exchange" -> "dead_letters")
+    couples.flatMap(Seq(_, _)).distinct.foreach(e => channel.exchangeDeclare(e, BuiltinExchangeType.TOPIC, true))
+    couples
+      .flatMap((b1, b2) => Seq(b1 + "_" + b2, b2 + "_" + b1))
+      .foreach(q => channel.queueDeclare(q, true, false, false, queueArgs.asJava))
+    couples
+      .flatMap((b1, b2) => Seq((b1, b1 + "_" + b2, b2), (b2, b2 + "_" + b1, b1)))
+      .foreach((e, q, r) => channel.queueBind(q, e, r))
+    channel.basicConsume("users_shopping", true, forwardToQueue(shoppingQueue), (_: String) => {})
+    channel.basicConsume("users_carts", true, forwardToQueue(cartsQueue), (_: String) => {})
+    channel.basicConsume("users_payments", true, forwardToQueue(paymentsQueue), (_: String) => {})
   }
 
   override def afterAll(): Unit = testKit.shutdownTestKit()
@@ -124,16 +132,31 @@ class MessageBrokerActorTest extends AnyFunSpec with TestContainerForAll with Be
         messageBroker.getOrElse(fail()) ! CustomerUnregistered(email)
         val shoppingMessage: Map[String, String] = shoppingQueue.poll(10, TimeUnit.SECONDS)
         shoppingMessage("exchange") shouldBe "users"
-        shoppingMessage("routingKey") shouldBe "customer"
-        shoppingMessage("body").parseJson.convertTo[CustomerUnregisteredEvent].email shouldBe email
+        shoppingMessage("routingKey") shouldBe "shopping"
+        shoppingMessage("contentType") shouldBe "application/json"
+        shoppingMessage(
+          "correlationId"
+        ) should fullyMatch regex "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+        shoppingMessage("replyTo") shouldBe "users"
+        shoppingMessage("body").parseJson.convertTo[ResultResponseEntity[CustomerUnregisteredEvent]].result.email shouldBe email
         val paymentsMessage: Map[String, String] = paymentsQueue.poll(10, TimeUnit.SECONDS)
         paymentsMessage("exchange") shouldBe "users"
-        paymentsMessage("routingKey") shouldBe "customer"
-        paymentsMessage("body").parseJson.convertTo[CustomerUnregisteredEvent].email shouldBe email
+        paymentsMessage("routingKey") shouldBe "payments"
+        paymentsMessage("contentType") shouldBe "application/json"
+        paymentsMessage(
+          "correlationId"
+        ) should fullyMatch regex "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+        paymentsMessage("replyTo") shouldBe "users"
+        paymentsMessage("body").parseJson.convertTo[ResultResponseEntity[CustomerUnregisteredEvent]].result.email shouldBe email
         val cartsMessage: Map[String, String] = cartsQueue.poll(10, TimeUnit.SECONDS)
         cartsMessage("exchange") shouldBe "users"
-        cartsMessage("routingKey") shouldBe "customer"
-        cartsMessage("body").parseJson.convertTo[CustomerUnregisteredEvent].email shouldBe email
+        cartsMessage("routingKey") shouldBe "carts"
+        cartsMessage("contentType") shouldBe "application/json"
+        cartsMessage("replyTo") shouldBe "users"
+        cartsMessage(
+          "correlationId"
+        ) should fullyMatch regex "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+        cartsMessage("body").parseJson.convertTo[ResultResponseEntity[CustomerUnregisteredEvent]].result.email shouldBe email
       }
     }
   }
