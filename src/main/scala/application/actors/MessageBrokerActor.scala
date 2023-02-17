@@ -7,6 +7,21 @@
 package io.github.pervasivecats
 package application.actors
 
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.util.UUID
+
+import scala.jdk.CollectionConverters.MapHasAsJava
+import scala.util.Try
+
+import akka.actor.typed.*
+import akka.actor.typed.scaladsl.Behaviors
+import com.rabbitmq.client.*
+import com.typesafe.config.Config
+import spray.json.JsonFormat
+import spray.json.JsonWriter
+import spray.json.enrichAny
+
 import application.actors.commands.MessageBrokerCommand.CustomerUnregistered
 import application.actors.commands.RootCommand.Startup
 import application.Serializers.given
@@ -14,17 +29,6 @@ import application.actors.commands.{MessageBrokerCommand, RootCommand}
 import application.routes.entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
 import application.routes.entities.Entity
 import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
-
-import akka.actor.typed.*
-import akka.actor.typed.scaladsl.Behaviors
-import com.rabbitmq.client.*
-import com.typesafe.config.Config
-import spray.json.{enrichAny, JsonFormat, JsonWriter}
-
-import java.nio.charset.{Charset, StandardCharsets}
-import java.util.UUID
-import scala.jdk.CollectionConverters.MapHasAsJava
-import scala.util.Try
 
 object MessageBrokerActor {
 

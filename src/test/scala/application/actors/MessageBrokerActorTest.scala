@@ -12,9 +12,13 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.MapHasAsJava
+
+import io.github.pervasivecats.application.routes.entities.Entity.ResultResponseEntity
+
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRef
@@ -37,14 +41,13 @@ import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.DockerImageName
 import spray.json.enrichAny
 import spray.json.enrichString
+
 import commands.MessageBrokerCommand.CustomerUnregistered
 import commands.RootCommand.Startup
 import application.Serializers.given
 import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 import users.customer.valueobjects.Email
-
 import commands.{MessageBrokerCommand, RootCommand}
-import io.github.pervasivecats.application.routes.entities.Entity.ResultResponseEntity
 
 class MessageBrokerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 
