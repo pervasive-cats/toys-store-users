@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0...v1.0.1) (2023-02-17)
+
+
+### Bug Fixes
+
+* refactor and fix implementation of message broker actor ([1ef083a](https://github.com/pervasive-cats/toys-store-users/commit/1ef083a4e7da77fca2db68fd781ef39532be5939))
+
 # 1.0.0 (2023-02-07)
 
 
