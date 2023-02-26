@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.1...v1.0.2) (2023-02-26)
+
+
+### Bug Fixes
+
+* fix message broker reply messages ([f67666f](https://github.com/pervasive-cats/toys-store-users/commit/f67666f087b65bee053fd1f581e899c5448d2814))
+
 ## [1.0.1](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.0...v1.0.1) (2023-02-17)
 
 
