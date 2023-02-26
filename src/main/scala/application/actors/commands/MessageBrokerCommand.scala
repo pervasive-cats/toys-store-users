@@ -7,11 +7,11 @@
 package io.github.pervasivecats
 package application.actors.commands
 
-import users.customer.valueobjects.Email
+import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 
 sealed trait MessageBrokerCommand
 
 object MessageBrokerCommand {
 
-  final case class CustomerUnregistered(email: Email) extends MessageBrokerCommand
+  final case class CustomerUnregistered(event: CustomerUnregisteredEvent) extends MessageBrokerCommand
 }

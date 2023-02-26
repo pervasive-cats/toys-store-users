@@ -32,6 +32,7 @@ import users.customer.entities.Customer
 import users.customer.entities.CustomerOps.updated
 import users.user.services.PasswordAlgorithm
 import commands.{CustomerServerCommand, MessageBrokerCommand, RootCommand}
+import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 
 object CustomerServerActor {
 
@@ -64,7 +65,7 @@ object CustomerServerActor {
             } yield ()).onComplete {
               case Failure(_) => replyTo ! EmptyResponse(Left[ValidationError, Unit](RequestProcessingFailed))
               case Success(value) =>
-                value.foreach(_ => messageBrokerActor ! CustomerUnregistered(email))
+                value.foreach(_ => messageBrokerActor ! CustomerUnregistered(CustomerUnregisteredEvent(email)))
                 replyTo ! EmptyResponse(value)
             }(ctx.executionContext)
             Behaviors.same[CustomerServerCommand]

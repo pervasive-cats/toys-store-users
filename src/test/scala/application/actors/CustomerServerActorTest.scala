@@ -40,6 +40,7 @@ import users.customer.entities.CustomerOps.updated
 import users.user.services.PasswordAlgorithm.PasswordNotMatching
 import commands.{CustomerServerCommand, MessageBrokerCommand, RootCommand}
 import application.routes.entities.Response
+import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 
 class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with BeforeAndAfterAll {
 
@@ -117,7 +118,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         checkCustomer(customer)
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(email)))
       }
     }
 
@@ -130,7 +131,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Left[ValidationError, Customer](PasswordNotMatching)))
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(email)))
       }
     }
 
@@ -141,7 +142,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         checkCustomer(customer)
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(email)))
         server ! LoginCustomer(email, password, customerResponseProbe.ref)
         customerResponseProbe.expectMessage(10.seconds, CustomerResponse(Left[ValidationError, Customer](CustomerNotFound)))
       }
@@ -157,7 +158,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         messageBrokerProbe.expectNoMessage(10.seconds)
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(email)))
       }
     }
 
@@ -185,7 +186,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         checkCustomer(newCustomer)
         server ! DeregisterCustomer(newCustomer.email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(newCustomer.email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(newCustomer.email)))
       }
     }
 
@@ -223,7 +224,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         checkCustomer(customer)
         server ! DeregisterCustomer(email, otherPassword, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(email)))
       }
     }
 
@@ -236,7 +237,7 @@ class CustomerServerActorTest extends AnyFunSpec with TestContainerForAll with B
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Left[ValidationError, Unit](PasswordNotMatching)))
         server ! DeregisterCustomer(email, password, emptyResponseProbe.ref)
         emptyResponseProbe.expectMessage(10.seconds, EmptyResponse(Right[ValidationError, Unit](())))
-        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(email))
+        messageBrokerProbe.expectMessage(10.seconds, CustomerUnregistered(CustomerUnregisteredEvent(email)))
       }
     }
 

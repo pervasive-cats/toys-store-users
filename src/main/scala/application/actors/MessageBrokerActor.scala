@@ -11,16 +11,22 @@ import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 
+import scala.concurrent.Promise
 import scala.jdk.CollectionConverters.MapHasAsJava
 import scala.util.Try
 
 import akka.actor.typed.*
+import akka.actor.typed.scaladsl.ActorContext
 import akka.actor.typed.scaladsl.Behaviors
 import com.rabbitmq.client.*
 import com.typesafe.config.Config
+import spray.json.JsNull
+import spray.json.JsObject
+import spray.json.JsValue
 import spray.json.JsonFormat
 import spray.json.JsonWriter
 import spray.json.enrichAny
+import spray.json.enrichString
 
 import application.actors.commands.MessageBrokerCommand.CustomerUnregistered
 import application.actors.commands.RootCommand.Startup
@@ -28,6 +34,7 @@ import application.Serializers.given
 import application.actors.commands.{MessageBrokerCommand, RootCommand}
 import application.routes.entities.Entity.{ErrorResponseEntity, ResultResponseEntity}
 import application.routes.entities.Entity
+import application.routes.entities.Response.EmptyResponse
 import users.customer.domainevents.CustomerUnregistered as CustomerUnregisteredEvent
 
 object MessageBrokerActor {
@@ -47,6 +54,36 @@ object MessageBrokerActor {
         .build(),
       response.toJson.compactPrint.getBytes(StandardCharsets.UTF_8)
     )
+
+  private def consume(
+    queue: String,
+    channel: Channel,
+    ctx: ActorContext[MessageBrokerCommand]
+  ): Unit =
+    channel.basicConsume(
+      queue,
+      true,
+      (_: String, message: Delivery) => {
+        val body: String = String(message.getBody, StandardCharsets.UTF_8)
+        body.parseJson.asJsObject.getFields("result", "error") match {
+          case Seq(JsObject(_), JsNull) => ()
+          case Seq(JsNull, JsObject(_)) =>
+            customerUnregisteredRequests
+              .get(UUID.fromString(message.getProperties.getCorrelationId))
+              .fold {
+                ctx.system.deadLetters[String] ! body
+                channel.basicReject(message.getEnvelope.getDeliveryTag, false)
+              }(e => ctx.self ! CustomerUnregistered(e))
+          case _ =>
+            ctx.system.deadLetters[String] ! body
+            channel.basicReject(message.getEnvelope.getDeliveryTag, false)
+        }
+      },
+      (_: String) => {}
+    )
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "scalafix:DisableSyntax.var"))
+  private var customerUnregisteredRequests: Map[UUID, CustomerUnregisteredEvent] = Map.empty
 
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
   def apply(root: ActorRef[RootCommand], messageBrokerConfig: Config): Behavior[MessageBrokerCommand] =
@@ -82,7 +119,6 @@ object MessageBrokerActor {
           channel.queueBind("dead_letters", "dead_letters", "")
           val couples: Seq[(String, String)] = Seq(
             "users" -> "shopping",
-            "users" -> "carts",
             "users" -> "payments"
           )
           val queueArgs: Map[String, String] = Map("x-dead-letter-exchange" -> "dead_letters")
@@ -93,6 +129,8 @@ object MessageBrokerActor {
           couples
             .flatMap((b1, b2) => Seq((b1, b1 + "_" + b2, b2), (b2, b2 + "_" + b1, b1)))
             .foreach((e, q, r) => channel.queueBind(q, e, r))
+          consume("shopping_users", channel, ctx)
+          consume("payments_users", channel, ctx)
           (c, channel)
         }
       }.map { (co, ch) =>
@@ -100,9 +138,12 @@ object MessageBrokerActor {
         Behaviors
           .receiveMessage[MessageBrokerCommand] {
             case CustomerUnregistered(e) =>
-              publish(ch, ResultResponseEntity(CustomerUnregisteredEvent(e)), routingKey = "shopping", UUID.randomUUID().toString)
-              publish(ch, ResultResponseEntity(CustomerUnregisteredEvent(e)), routingKey = "carts", UUID.randomUUID().toString)
-              publish(ch, ResultResponseEntity(CustomerUnregisteredEvent(e)), routingKey = "payments", UUID.randomUUID().toString)
+              val shoppingCorrelationId: UUID = UUID.randomUUID()
+              customerUnregisteredRequests += (shoppingCorrelationId -> e)
+              publish(ch, ResultResponseEntity(e), routingKey = "shopping", shoppingCorrelationId.toString)
+              val paymentsCorrelationId: UUID = UUID.randomUUID()
+              customerUnregisteredRequests += (paymentsCorrelationId -> e)
+              publish(ch, ResultResponseEntity(e), routingKey = "payments", paymentsCorrelationId.toString)
               Behaviors.same[MessageBrokerCommand]
           }
           .receiveSignal {
