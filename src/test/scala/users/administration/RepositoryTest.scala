@@ -20,6 +20,7 @@ import com.typesafe.config.ConfigValueFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import eu.timepit.refined.auto.given
+import io.getquill.JdbcContextConfig
 import org.scalatest.EitherValues.given
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers.*
@@ -50,10 +51,12 @@ class RepositoryTest extends AnyFunSpec with TestContainerForAll {
   override def afterContainersStart(containers: Containers): Unit =
     repository = Some(
       Repository(
-        ConfigFactory
-          .load()
-          .getConfig("repository")
-          .withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(containers.container.getFirstMappedPort.intValue()))
+        JdbcContextConfig(
+          ConfigFactory
+            .load()
+            .getConfig("repository")
+            .withValue("dataSource.portNumber", ConfigValueFactory.fromAnyRef(containers.container.getFirstMappedPort.intValue()))
+        ).dataSource
       )
     )
 

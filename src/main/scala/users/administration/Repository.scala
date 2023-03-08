@@ -7,6 +7,8 @@
 package io.github.pervasivecats
 package users.administration
 
+import javax.sql.DataSource
+
 import scala.Console.println
 import scala.util.Failure
 import scala.util.Success
@@ -98,5 +100,5 @@ object Repository {
     }
   }
 
-  def apply(config: Config): Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, config))
+  def apply(dataSource: DataSource): Repository = PostgresRepository(PostgresJdbcContext[SnakeCase](SnakeCase, dataSource))
 }

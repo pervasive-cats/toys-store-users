@@ -8,6 +8,7 @@ package io.github.pervasivecats
 package application.actors
 
 import java.util.concurrent.ForkJoinPool
+import javax.sql.DataSource
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -35,9 +36,9 @@ import commands.{RootCommand, StoreManagerServerCommand}
 
 object StoreManagerServerActor {
 
-  def apply(root: ActorRef[RootCommand], repositoryConfig: Config): Behavior[StoreManagerServerCommand] =
+  def apply(root: ActorRef[RootCommand], dataSource: DataSource): Behavior[StoreManagerServerCommand] =
     Behaviors.setup[StoreManagerServerCommand] { ctx =>
-      val storeManagerRepository: StoreManagerRepository = StoreManagerRepository(repositoryConfig)
+      val storeManagerRepository: StoreManagerRepository = StoreManagerRepository(dataSource)
       given ExecutionContext = ExecutionContext.fromExecutor(ForkJoinPool.commonPool())
       root ! Startup(success = true)
       Behaviors
