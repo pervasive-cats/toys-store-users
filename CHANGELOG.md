@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.2...v1.0.3) (2023-03-10)
+
+
+### Bug Fixes
+
+* remove code instrumentation when generating jar file ([418cb26](https://github.com/pervasive-cats/toys-store-users/commit/418cb26389e83f247fe99c0a58c0cdd50b05c481))
+* share connection pool between all database instances, close pool at system shutdown ([fdc33bc](https://github.com/pervasive-cats/toys-store-users/commit/fdc33bc261d679497c9709630c1ae80e830bf70f))
+
 ## [1.0.2](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.1...v1.0.2) (2023-02-26)
 
 
