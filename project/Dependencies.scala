@@ -8,7 +8,7 @@ object Dependencies {
 
   lazy val mockito: ModuleID = "org.mockito" % "mockito-core" % "5.1.1" % Test
 
-  lazy val refined: ModuleID = "eu.timepit" %% "refined" % "0.10.1"
+  lazy val refined: ModuleID = "eu.timepit" %% "refined" % "0.10.2"
 
   lazy val bcrypt: ModuleID = "at.favre.lib" % "bcrypt" % "0.10.2"
 
