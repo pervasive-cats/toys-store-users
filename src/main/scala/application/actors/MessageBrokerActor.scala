@@ -73,7 +73,7 @@ object MessageBrokerActor {
               .fold {
                 ctx.system.deadLetters[String] ! body
                 channel.basicReject(message.getEnvelope.getDeliveryTag, false)
-              }(e => ctx.self ! CustomerUnregistered(e))
+              }(e => publishRequest(channel, e, message.getEnvelope.getExchange))
           case _ =>
             ctx.system.deadLetters[String] ! body
             channel.basicReject(message.getEnvelope.getDeliveryTag, false)
@@ -86,6 +86,12 @@ object MessageBrokerActor {
   private var customerUnregisteredRequests: Map[UUID, CustomerUnregisteredEvent] = Map.empty
 
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
+  private def publishRequest(ch: Channel, e: CustomerUnregisteredEvent, routingKey: String): Unit = {
+    val shoppingCorrelationId: UUID = UUID.randomUUID()
+    customerUnregisteredRequests += (shoppingCorrelationId -> e)
+    publish(ch, ResultResponseEntity(e), routingKey, shoppingCorrelationId.toString)
+  }
+
   def apply(root: ActorRef[RootCommand], messageBrokerConfig: Config): Behavior[MessageBrokerCommand] =
     Behaviors.setup[MessageBrokerCommand] { ctx =>
       Try {
@@ -138,12 +144,8 @@ object MessageBrokerActor {
         Behaviors
           .receiveMessage[MessageBrokerCommand] {
             case CustomerUnregistered(e) =>
-              val shoppingCorrelationId: UUID = UUID.randomUUID()
-              customerUnregisteredRequests += (shoppingCorrelationId -> e)
-              publish(ch, ResultResponseEntity(e), routingKey = "shopping", shoppingCorrelationId.toString)
-              val paymentsCorrelationId: UUID = UUID.randomUUID()
-              customerUnregisteredRequests += (paymentsCorrelationId -> e)
-              publish(ch, ResultResponseEntity(e), routingKey = "payments", paymentsCorrelationId.toString)
+              publishRequest(ch, e, routingKey = "shopping")
+              publishRequest(ch, e, routingKey = "payments")
               Behaviors.same[MessageBrokerCommand]
           }
           .receiveSignal {
