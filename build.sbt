@@ -49,7 +49,7 @@ lazy val root = project
       akkaHttpTestkit
     ),
     wartremoverErrors ++= Warts.allBut(Wart.ImplicitParameter),
-    version := "1.0.3",
+    version := "1.0.4",
     coverageMinimumStmtTotal := 80,
     coverageMinimumBranchTotal := 80,
     headerLicense := Some(

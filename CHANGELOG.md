@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.3...v1.0.4) (2023-03-13)
+
+
+### Bug Fixes
+
+* fix resend of messages from message broker when error is encountered ([7b5cc5b](https://github.com/pervasive-cats/toys-store-users/commit/7b5cc5b2a6e73b9521403210cc1e5f3ee4953d9a))
+
 ## [1.0.3](https://github.com/pervasive-cats/toys-store-users/compare/v1.0.2...v1.0.3) (2023-03-10)
 
 
