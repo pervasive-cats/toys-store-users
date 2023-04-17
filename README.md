@@ -8,9 +8,11 @@
 [![Pull requests](https://img.shields.io/github/issues-pr/pervasive-cats/toys-store-users)](https://github.com/pervasive-cats/toys-store-users/pulls)
 [![Codecov](https://codecov.io/gh/pervasive-cats/toys-store-users/branch/main/graph/badge.svg?token=UX36N6CU78)](https://codecov.io/gh/pervasive-cats/toys-store-users)
 
-## API
+## Documentation
 
-The API for this microservice can be found at [this link](https://app.swaggerhub.com/apis/matteo.castellucci3/Users/1.0.0).
+The API documentation for this microservice can be found at [this link](https://app.swaggerhub.com/apis/matteo.castellucci3/Users/1.0.0).
+
+The code documentation for this repository can be found at [this link](https://pervasive-cats.github.io/toys-store-users/).
 
 ### Copyright statement
 
